@@ -18,17 +18,16 @@ package flinkstreaming;
  * limitations under the License.
  */
 
-import Preprocess.FilterIndo;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
+import Model.ClusterResult;
+import Model.Instance;
+import Streamprocess.ClusterText;
+import Streamprocess.ClusterWindow;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.twitter.TwitterSource;
-import org.apache.flink.util.Collector;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import java.io.IOException;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
 
 
 /**
@@ -73,51 +72,33 @@ public class StreamingJob {
 		/*
 		* WITH DUMMY SOURCE
 		* */
-		DataStream<String> dummyTweet = env.socketTextStream("localhost",4542,'\n', 0);
-		dummyTweet.print();
+		DataStream<String> dummyTweet = env.socketTextStream("localhost",4542,"\n", 0);
+//		dummyTweet.print();
 		/*
 		* END OF DUMMY SOURCE
 		* */
 
-		//test count
-//		DataStream<Tuple2<String, Integer>> counts =
-//				// split up the lines in pairs (2-tuples) containing: (word,1)
-//				dummyTweet.flatMap(new StreamingJob.SelectIndonesianTokenize())
-//						// group by the tuple field "0" and sum up tuple field "1"
-//						.keyBy(0)
-//						.sum(1);
-//		counts.print();
+		//test
+		DataStream<Instance> streamOutput =
+				dummyTweet.flatMap(new ClusterText()).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
+					@Override
+					public long extractAscendingTimestamp(Instance element) {
+						return element.getTime();
+					}
+				});
 
+		DataStream<ClusterResult> windowedStream = streamOutput.keyBy(new KeySelector<Instance, String>() {
+			public String getKey(Instance inst) {return "1";}
+		}).window(TumblingProcessingTimeWindows.of(Time.minutes(5)))
+				.apply(new ClusterWindow());
+
+		windowedStream.print();
 		// execute program
 		env.execute("Java word count from SocketTextStream Example");
 	}
 
-	public static final class SelectIndonesianTokenize implements FlatMapFunction<String, Tuple2<String, Integer>> {
 
-		private transient ObjectMapper jsonParser;
-		@Override
-		public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws IOException {
-			if(jsonParser ==null){
-				jsonParser = new ObjectMapper();
-			}
 
-			JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-
-			boolean isIndonesian = jsonNode.has("user") && jsonNode.get("user").get("lang").getTextValue().equals("id");
-			boolean hasText = jsonNode.has("created_at") && jsonNode.has("text");
-
-			if(isIndonesian && hasText){
-				// normalize and split the line
-				System.out.println(jsonNode);
-				String[] tokens = jsonNode.get("text").getTextValue().toLowerCase().split("\\W+");
-
-				// emit the pairs
-				for (String token : tokens) {
-					if (token.length() > 0) {
-						out.collect(new Tuple2<String, Integer>(token, 1));
-					}
-				}
-			}
-		}
-	}
 }
+
+
