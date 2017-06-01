@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <!--PICK ONE SOURCE-->
+    <!--<source>-->
+        <!--<name>twitter</name>-->
+        <!--<properties-file>twitter.properties</properties-file>-->
+    <!--</source>-->
+    <source>
+        <name>socket</name>
+        <ip>localhost</ip>
+        <port>4542</port>
+    </source>
+
+    <!--KEY FOR STREAM DATA-->
+    <keyBy>
+        <type>static</type>
+        <value>1</value>
+    </keyBy>
+    <!--<keyBy>-->
+        <!--<type>json</type>-->
+        <!--<attribute>id</attribute>-->
+    <!--</keyBy>-->
+
+
+    <!--WINDOW CONFIGURATION-->
+    <window>
+        <type>sliding</type><!--options: tumbling / sliding / session -->
+        <time>event</time>
+        <size>
+            <type>minute</type><!--options: count / second / minute / hour / day -->
+            <value>5</value>
+        </size>
+        <overlap>
+            <type>minute</type><!--options: count / second / minute / hour / day -->
+            <value>2</value>
+        </overlap>
+    </window>
+
+    <!--SINK CONFIGURATION-->
+    <SourceSink>
+        <type>print</type>
+    </SourceSink>
+    <WindowSink>
+        <type>print</type>
+    </WindowSink>
+
+
+</configuration>

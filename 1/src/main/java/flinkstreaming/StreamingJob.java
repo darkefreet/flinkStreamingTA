@@ -22,12 +22,14 @@ import Model.ClusterResult;
 import Model.Instance;
 import Streamprocess.ClusterText;
 import Streamprocess.ClusterWindow;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.connectors.twitter.TwitterSource;
 
 
 /**
@@ -52,35 +54,39 @@ import org.apache.flink.streaming.api.windowing.time.Time;
  */
 public class StreamingJob {
 
+	private static DataStream<String> source;
+	private static XMLConfiguration config;
+
 	public static void main(String[] args) throws Exception {
 
 		// set up the execution environment
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment
 				.getExecutionEnvironment();
 
-//		/*
-//		* WITH TWITTER SOURCE
-//		* */
-//		//set Twitter properties to authenticate
-//		TwitterSource twitterSource = new TwitterSource("twitter.properties");
-//		// get input data
-//		DataStream<String> text = env.addSource(twitterSource);
-//		/*
-//		* END OF TWITTER SOURCE
-//		* */
+		//read from configuration
 
-		/*
-		* WITH DUMMY SOURCE
-		* */
-		DataStream<String> dummyTweet = env.socketTextStream("localhost",4542,"\n", 0);
-//		dummyTweet.print();
-		/*
-		* END OF DUMMY SOURCE
-		* */
+		config = new XMLConfiguration("config.xml");
+
+		switch(config.getString("source.name")){
+			case "twitter":{
+				//set Twitter properties to authenticate
+				TwitterSource twitterSource = new TwitterSource(config.getString("source.properties-file"));
+				// get input data
+				source = env.addSource(twitterSource);
+			}
+			break;
+			case "socket":{
+				source = env.socketTextStream(config.getString("source.ip"),config.getInt("source.port"),"\n", 0);
+			}
+			break;
+			default:
+				System.out.println("No source given");
+				source = null;
+		}
 
 		//test
 		DataStream<Instance> streamOutput =
-				dummyTweet.flatMap(new ClusterText()).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
+				source.flatMap(new ClusterText()).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
 					@Override
 					public long extractAscendingTimestamp(Instance element) {
 						return element.getTime();
