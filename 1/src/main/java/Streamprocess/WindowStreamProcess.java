@@ -11,7 +11,7 @@ import org.apache.flink.util.Collector;
 /**
  * Created by wilhelmus on 23/05/17.
  */
-public class ClusterWindow implements WindowFunction<Instance, ClusterResult, String, TimeWindow> {
+public class WindowStreamProcess implements WindowFunction<Instance, ClusterResult, String, TimeWindow> {
     @Override
     public void apply(String s, TimeWindow timeWindow, Iterable<Instance> iterable, Collector<ClusterResult> collector) throws Exception {
         ClusterResult result = new ClusterResult();

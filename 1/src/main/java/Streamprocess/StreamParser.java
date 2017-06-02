@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Created by wilhelmus on 17/05/17.
  */
-public class ClusterText implements FlatMapFunction<String, Instance> {
+public class StreamParser implements FlatMapFunction<String, Instance> {
 
     private transient ObjectMapper jsonParser;
     @Override

@@ -20,16 +20,18 @@ package flinkstreaming;
 
 import Model.ClusterResult;
 import Model.Instance;
-import Streamprocess.ClusterText;
-import Streamprocess.ClusterWindow;
+import Streamprocess.StreamParser;
+import Streamprocess.WindowStreamProcess;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.*;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.twitter.TwitterSource;
+
+import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -79,29 +81,200 @@ public class StreamingJob {
 				source = env.socketTextStream(config.getString("source.ip"),config.getInt("source.port"),"\n", 0);
 			}
 			break;
-			default:
+			default: {
 				System.out.println("No source given");
 				source = null;
+			}
 		}
 
 		//test
 		DataStream<Instance> streamOutput =
-				source.flatMap(new ClusterText()).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
+				source.flatMap(new StreamParser()).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
 					@Override
 					public long extractAscendingTimestamp(Instance element) {
 						return element.getTime();
 					}
 				});
 
-		DataStream<ClusterResult> windowedStream = streamOutput.keyBy(new KeySelector<Instance, String>() {
-			public String getKey(Instance inst) {return "1";}
-		}).window(TumblingProcessingTimeWindows.of(Time.minutes(5)))
-				.apply(new ClusterWindow());
+		KeySelector keySelect = new KeySelector<Instance, String>() {
+			public String getKey(Instance inst) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+				switch(config.getString("keyBy.type")){
+					case "static":
+						return config.getString("keyBy.value");
+					case "object":
+						return String.valueOf(inst.getClass().getDeclaredMethod(config.getString("keyBy.function")).invoke(inst));
+					default:
+						return "1";
+				}
+			}
+		};
 
-		windowedStream.print();
+		DataStream<ClusterResult> windowedStream;
+		switch(config.getString("window.type")){
+			case "tumbling": {
+				switch (config.getString("window.time")) {
+					case "event": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingEventTimeWindows.of(Time.seconds(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingEventTimeWindows.of(Time.minutes(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingEventTimeWindows.of(Time.hours(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+					case "process": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingProcessingTimeWindows.of(Time.seconds(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingProcessingTimeWindows.of(Time.minutes(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(TumblingProcessingTimeWindows.of(Time.hours(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case "sliding":{
+				switch (config.getString("window.time")) {
+					case "event": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingEventTimeWindows.of(Time.seconds(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingEventTimeWindows.of(Time.minutes(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingEventTimeWindows.of(Time.hours(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+					case "process": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingProcessingTimeWindows.of(Time.seconds(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingProcessingTimeWindows.of(Time.minutes(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(SlidingProcessingTimeWindows.of(Time.hours(config.getInt("window.size.value")), Time.seconds(config.getInt("window.size.overlap"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case "session":{
+				switch (config.getString("window.time")) {
+					case "event": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(EventTimeSessionWindows.withGap(Time.seconds(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(EventTimeSessionWindows.withGap(Time.minutes(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(EventTimeSessionWindows.withGap(Time.hours(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+					case "process": {
+						switch(config.getString("window.size.type")){
+							case "seconds": {
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(ProcessingTimeSessionWindows.withGap(Time.seconds(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "minutes":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(ProcessingTimeSessionWindows.withGap(Time.minutes(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+							case "hours":{
+								windowedStream = streamOutput.keyBy(keySelect)
+										.window(ProcessingTimeSessionWindows.withGap(Time.hours(config.getInt("window.size.value"))))
+										.apply(new WindowStreamProcess());
+								break;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			default:{
+				windowedStream = streamOutput.keyBy(keySelect)
+						.window(TumblingProcessingTimeWindows.of(Time.minutes(2)))
+						.apply(new WindowStreamProcess());
+			}
+		}
+
 		// execute program
 		env.execute("Java word count from SocketTextStream Example");
 	}
+
 
 
 

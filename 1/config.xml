@@ -12,36 +12,33 @@
     </source>
 
     <!--KEY FOR STREAM DATA-->
-    <keyBy>
-        <type>static</type>
-        <value>1</value>
-    </keyBy>
     <!--<keyBy>-->
-        <!--<type>json</type>-->
-        <!--<attribute>id</attribute>-->
+        <!--<type>static</type>-->
+        <!--<value>1</value>-->
     <!--</keyBy>-->
+    <keyBy>
+        <type>object</type>
+        <function>id</function>
+    </keyBy>
 
 
     <!--WINDOW CONFIGURATION-->
     <window>
         <type>sliding</type><!--options: tumbling / sliding / session -->
-        <time>event</time>
+        <time>process</time><!--options: event / process-->
         <size>
-            <type>minute</type><!--options: count / second / minute / hour / day -->
+            <type>minute</type><!--options: second / minutes / hours -->
             <value>5</value>
+            <overlap>2</overlap>
         </size>
-        <overlap>
-            <type>minute</type><!--options: count / second / minute / hour / day -->
-            <value>2</value>
-        </overlap>
     </window>
 
     <!--SINK CONFIGURATION-->
     <SourceSink>
-        <type>print</type>
+        <type>print()</type>
     </SourceSink>
     <WindowSink>
-        <type>print</type>
+        <type>print()</type>
     </WindowSink>
 
 
