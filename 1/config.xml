@@ -18,7 +18,7 @@
     <!--</keyBy>-->
     <keyBy>
         <type>object</type>
-        <function>id</function>
+        <function>getId</function>
     </keyBy>
 
 
@@ -27,19 +27,24 @@
         <type>sliding</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
-            <type>minute</type><!--options: second / minutes / hours -->
-            <value>5</value>
-            <overlap>2</overlap>
+            <hours>0</hours>
+            <minutes>5</minutes>
+            <seconds>0</seconds>
         </size>
+        <overlap>
+            <hours>0</hours>
+            <minutes>2</minutes>
+            <seconds>0</seconds>
+        </overlap>
     </window>
 
     <!--SINK CONFIGURATION-->
-    <SourceSink>
-        <type>print()</type>
-    </SourceSink>
-    <WindowSink>
-        <type>print()</type>
-    </WindowSink>
+    <sourceSink>
+        <type>print</type>
+    </sourceSink>
+    <windowSink>
+        <type>print</type>
+    </windowSink>
 
 
 </configuration>
