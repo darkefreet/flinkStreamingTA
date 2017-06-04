@@ -12,14 +12,14 @@
     </source>
 
     <!--KEY FOR STREAM DATA-->
-    <!--<keyBy>-->
-        <!--<type>static</type>-->
-        <!--<value>1</value>-->
-    <!--</keyBy>-->
     <keyBy>
-        <type>object</type>
-        <function>getId</function>
+        <type>static</type>
+        <value>1</value>
     </keyBy>
+    <!--<keyBy>-->
+        <!--<type>object</type>-->
+        <!--<function>getId</function>-->
+    <!--</keyBy>-->
 
 
     <!--WINDOW CONFIGURATION-->
@@ -28,13 +28,13 @@
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>
-            <minutes>5</minutes>
+            <minutes>1</minutes>
             <seconds>0</seconds>
         </size>
         <overlap>
             <hours>0</hours>
-            <minutes>2</minutes>
-            <seconds>0</seconds>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
         </overlap>
     </window>
 
@@ -42,8 +42,21 @@
     <sourceSink>
         <type>print</type>
     </sourceSink>
+    <!--<windowSink>-->
+        <!--<type>print</type>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+        <!--<type>csv</type>-->
+        <!--<path>csvOutput</path>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+        <!--<type>text</type>-->
+        <!--<path>textOutput</path>-->
+    <!--</windowSink>-->
     <windowSink>
-        <type>print</type>
+        <type>socket</type>
+        <ip>localhost</ip>
+        <port>4543</port>
     </windowSink>
 
 

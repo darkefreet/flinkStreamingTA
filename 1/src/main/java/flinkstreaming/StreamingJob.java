@@ -30,6 +30,7 @@ import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExt
 import org.apache.flink.streaming.api.windowing.assigners.*;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.twitter.TwitterSource;
+import org.apache.flink.streaming.util.serialization.SerializationSchema;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -167,7 +168,31 @@ public class StreamingJob {
 				break;
 			}
 		}
-		windowedStream.print();
+
+		switch(config.getString("windowSink.type")){
+			case "text": {
+				windowedStream.writeAsText(config.getString("windowSink.path"));
+				break;
+			}
+			case "csv": {
+				windowedStream.writeAsCsv(config.getString("windowSink.path"));
+				break;
+			}
+			case "socket":{
+				windowedStream.writeToSocket(config.getString("windowSink.ip"), config.getInt("windowSink.port"), new SerializationSchema<ClusterResult>() {
+					@Override
+					public byte[] serialize(ClusterResult clusterResult) {
+						return clusterResult.toString().getBytes();
+					}
+				});
+				break;
+			}
+
+			default:{
+				windowedStream.print();
+				break;
+			}
+		}
 
 		// execute program
 		env.execute("Java word count from SocketTextStream Example");

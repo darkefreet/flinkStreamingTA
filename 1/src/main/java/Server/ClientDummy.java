@@ -9,14 +9,16 @@ import java.net.*;
 public class ClientDummy {
     public static void main(String[] args){
         try {
-            Socket clientSocket = new Socket("localhost", 4542);
-            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String sentence;
-            while(!(sentence= inFromServer.readLine()).equals(null)) {
-                System.out.println(sentence);
+            ServerSocket clientSocket = new ServerSocket(4543);
+            while(true){
+                Socket connection= clientSocket.accept();
+                System.out.println("connected");
+                BufferedReader inFromServer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String sentence;
+                while(!(sentence= inFromServer.readLine()).equals(null)) {
+                    System.out.println(sentence);
+                }
             }
-            clientSocket.close();
-
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
