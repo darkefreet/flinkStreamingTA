@@ -11,38 +11,80 @@
         <port>4542</port>
     </source>
 
+    <!--DATA TYPE AND FILTERS-->
+    <data>
+        <type>tweet</type>
+        <tweetFilters>
+            <filter>
+                <type>lang</type>
+                <value>in</value>
+            </filter>
+            <filter>
+                <type></type>
+                <value>not-null</value>
+            </filter>
+        </tweetFilters>
+    </data>
+
     <!--KEY FOR STREAM DATA-->
     <keyBy>
         <type>static</type>
         <value>1</value>
     </keyBy>
     <!--<keyBy>-->
-        <!--<type>json</type>-->
-        <!--<attribute>id</attribute>-->
+        <!--<type>object</type>-->
+        <!--<function>getId</function>-->
     <!--</keyBy>-->
 
+    <!--DATA MINING CONFIGURATION-->
+    <dataMining>
+        <type>clustering</type>
+        <algorithm>dbscan</algorithm>
+        <distance>euclidean</distance>
+        <attributes>
+            <attribute>
+                <field>text</field>
+                <type>text</type>
+                <weight>1.0</weight><!--for standardized attribute weight-->
+            </attribute>
+        </attributes>
+    </dataMining>
 
     <!--WINDOW CONFIGURATION-->
     <window>
         <type>sliding</type><!--options: tumbling / sliding / session -->
-        <time>event</time>
+        <time>process</time><!--options: event / process-->
         <size>
-            <type>minute</type><!--options: count / second / minute / hour / day -->
-            <value>5</value>
+            <hours>0</hours>
+            <minutes>1</minutes>
+            <seconds>0</seconds>
         </size>
-        <overlap>
-            <type>minute</type><!--options: count / second / minute / hour / day -->
-            <value>2</value>
+        <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
         </overlap>
     </window>
 
     <!--SINK CONFIGURATION-->
-    <SourceSink>
+    <sourceSink>
         <type>print</type>
-    </SourceSink>
-    <WindowSink>
+    </sourceSink>
+    <windowSink>
         <type>print</type>
-    </WindowSink>
-
+    </windowSink>
+    <!--<windowSink>-->
+        <!--<type>csv</type>-->
+        <!--<path>csvOutput</path>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+        <!--<type>text</type>-->
+        <!--<path>textOutput</path>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+        <!--<type>socket</type>-->
+        <!--<ip>localhost</ip>-->
+        <!--<port>4543</port>-->
+    <!--</windowSink>-->
 
 </configuration>

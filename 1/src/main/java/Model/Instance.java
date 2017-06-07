@@ -1,5 +1,9 @@
 package Model;
 
+import org.apache.sling.commons.json.JSONObject;
+import org.codehaus.jackson.JsonNode;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -8,16 +12,19 @@ import java.util.HashMap;
 public class Instance {
     private String id;
     private String sentence;
+    private ArrayList<Object> attributes;
+    private JsonNode json;
     private HashMap<String, Integer> wordCounts;
     private long time;
     private double svdX = 0.0;
     private double svdY = 0.0;
 
-    public Instance(String _id, String _words, String _sentence){
+    public Instance(String _id, String _words, JsonNode _json){
         this.time = System.currentTimeMillis();
         this.id = _id;
         this.wordCounts = new HashMap<>();
-        this.sentence = _sentence;
+        this.json = _json;
+        this.sentence = this.json.get("text").getTextValue();
         for(String word : _words.split("\\W")) {
             if(!word.isEmpty()) {
                 if (this.wordCounts.containsKey(word)) {

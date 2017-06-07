@@ -50,7 +50,7 @@ public class ClusterResult {
     }
 
     public void calculateSVD(){
-        if(instances.size()>0) {
+        if(instances.size()>2 ) {
             Set<String> terms = new HashSet<String>();
             for (Instance i : instances) {
                 for (String s : i.getWordCounts().keySet()) {

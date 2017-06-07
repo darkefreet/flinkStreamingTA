@@ -1,31 +1,68 @@
 package Preprocess;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by wilhelmus on 19/04/17.
  */
-public class TweetFilter{
+
+public class TweetFilter {
 
     private ObjectMapper jsonParser;
+    private XMLConfiguration config;
 
-    public TweetFilter(){
+    public TweetFilter(XMLConfiguration _config)
+    {
         jsonParser = new ObjectMapper();
+        config = _config;
     }
 
-    public boolean isIndonesian(String value) throws IOException {
+
+    public boolean filter(String value) throws IOException {
         if(jsonParser ==null){
             jsonParser = new ObjectMapper();
         }
+        List<HierarchicalConfiguration> hconfig = config.configurationsAt("data.tweetFilters.filter");
+        boolean ret = true;
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-        boolean isIndonesian = jsonNode.has("user") && jsonNode.get("user").get("lang").getTextValue().equals("id");
-        boolean hasText = jsonNode.has("created_at") && jsonNode.has("text");
+        for (HierarchicalConfiguration h : hconfig){
+            String[] attributes = h.getString("attribute").split(".");
+            JsonNode temp = jsonNode.get(attributes[0]);
+            if(attributes.length > 1){
+                for(int i = 1; i < attributes.length; i++){
+                    temp = temp.get(attributes[i]);
+                }
+            }
+            if(temp.equals(null)) {
+                ret = false;
+                break;
+            }else{
+                switch(h.getString("dataType")){
+                    case "string":{
+                        if(!temp.getTextValue().equals(h.getString("value")))
+                            ret = false;
+                        break;
+                    }
+                    case "count":{
+                        if(!temp.isArray() && !(temp.size()>=h.getDouble("value")))
+                            ret = false;
+                        break;
+                    }
+                    default:{ //integer
+                        if(!(temp.getIntValue()>=h.getInt("value")))
+                            ret = false;
+                    }
+                }
+            }
+        }
 
-        if(isIndonesian && hasText)
-            return true;
-        else return false;
+        boolean hasText = jsonNode.has("created_at") && jsonNode.has("text");
+        return ret && hasText;
     }
 }

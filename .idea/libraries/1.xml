@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/1/tml-3.2-core.jar!/" />
+      <root url="jar://$PROJECT_DIR$/1/lingpipe-4.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/1/InaNLP.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
