@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="tml-3.2-core">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/tml-3.2-core.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
