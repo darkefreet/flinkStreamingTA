@@ -1,5 +1,8 @@
 package Model;
 
+import org.apache.sling.commons.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -8,6 +11,8 @@ import java.util.HashMap;
 public class Instance {
     private String id;
     private String sentence;
+    private ArrayList<Object> attributes;
+    private JSONObject json;
     private HashMap<String, Integer> wordCounts;
     private long time;
     private double svdX = 0.0;
