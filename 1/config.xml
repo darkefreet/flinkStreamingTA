@@ -16,12 +16,21 @@
         <type>tweet</type>
         <tweetFilters>
             <filter>
-                <type>lang</type>
+                <dataType>string</dataType>
+                <attribute>lang</attribute>
                 <value>in</value>
             </filter>
             <filter>
-                <type></type>
-                <value>not-null</value>
+                <dataType>integer</dataType>
+                <attribute>user.friends_count</attribute>
+                <value>5</value>
+                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+            </filter>
+            <filter>
+                <dataType>count</dataType>
+                <attribute>entities.hashtags</attribute>
+                <value>0</value>
+                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
         </tweetFilters>
     </data>

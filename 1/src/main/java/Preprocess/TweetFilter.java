@@ -32,12 +32,19 @@ public class TweetFilter {
         boolean ret = true;
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
         for (HierarchicalConfiguration h : hconfig){
-            String[] attributes = h.getString("attribute").split(".");
-            JsonNode temp = jsonNode.get(attributes[0]);
-            if(attributes.length > 1){
-                for(int i = 1; i < attributes.length; i++){
-                    temp = temp.get(attributes[i]);
+            JsonNode temp = null;
+            if(h.getString("attribute").contains(".")){
+                String attribute = h.getString("attribute");
+                String[] attributes = attribute.split("\\.");
+                temp = jsonNode.get(attributes[0]);
+                if(attributes.length > 1){
+                    for(int i = 1; i < attributes.length; i++){
+                        temp = temp.get(attributes[i]);
+                    }
                 }
+            }
+            else{
+                temp = jsonNode.get(h.getString("attribute"));
             }
             if(temp.equals(null)) {
                 ret = false;

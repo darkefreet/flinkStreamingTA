@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class StreamParser implements FlatMapFunction<String, Instance> {
 
-    private transient XMLConfiguration config;
+    private static XMLConfiguration config;
     private transient ObjectMapper jsonParser;
 
     public StreamParser() throws ConfigurationException {
