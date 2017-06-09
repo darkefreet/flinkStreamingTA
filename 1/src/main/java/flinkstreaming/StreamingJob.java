@@ -18,7 +18,7 @@ package flinkstreaming;
  * limitations under the License.
  */
 
-import Model.ClusterResult;
+import Model.AnalysisResult;
 import Model.Instance;
 import Streamprocess.StreamParser;
 import Streamprocess.WindowStreamProcess;
@@ -110,7 +110,7 @@ public class StreamingJob {
 			}
 		};
 
-		DataStream<ClusterResult> windowedStream;
+		DataStream<AnalysisResult> windowedStream;
 		Long windowTime = 0L;
 		Long overlapTime = 0L;
 		windowTime = windowTime + (config.getInt("window.size.hours")*3600) + (config.getInt("window.size.minutes")*60) + (config.getInt("window.size.seconds"));
@@ -171,18 +171,18 @@ public class StreamingJob {
 
 		switch(config.getString("windowSink.type")){
 			case "text": {
-				windowedStream.writeAsText(config.getString("windowSink.path"));
+				windowedStream.writeAsText(config.getString("windowSink.path")).setParallelism(1);
 				break;
 			}
 			case "csv": {
-				windowedStream.writeAsCsv(config.getString("windowSink.path"));
+				windowedStream.writeAsCsv(config.getString("windowSink.path")).setParallelism(1);
 				break;
 			}
 			case "socket":{
-				windowedStream.writeToSocket(config.getString("windowSink.ip"), config.getInt("windowSink.port"), new SerializationSchema<ClusterResult>() {
+				windowedStream.writeToSocket(config.getString("windowSink.ip"), config.getInt("windowSink.port"), new SerializationSchema<AnalysisResult>() {
 					@Override
-					public byte[] serialize(ClusterResult clusterResult) {
-						return clusterResult.toString().getBytes();
+					public byte[] serialize(AnalysisResult analysisResult) {
+						return analysisResult.toString().getBytes();
 					}
 				});
 				break;
@@ -197,9 +197,6 @@ public class StreamingJob {
 		// execute program
 		env.execute("Java word count from SocketTextStream Example");
 	}
-
-
-
 
 }
 

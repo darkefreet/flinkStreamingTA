@@ -14,6 +14,7 @@
     <!--DATA TYPE AND FILTERS-->
     <data>
         <type>tweet</type>
+        <id>id</id>
         <tweetFilters>
             <filter>
                 <dataType>string</dataType>

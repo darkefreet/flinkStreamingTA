@@ -37,9 +37,11 @@ public class TweetFilter {
                 String attribute = h.getString("attribute");
                 String[] attributes = attribute.split("\\.");
                 temp = jsonNode.get(attributes[0]);
+                if(temp.equals(null)) break;
                 if(attributes.length > 1){
                     for(int i = 1; i < attributes.length; i++){
                         temp = temp.get(attributes[i]);
+                        if(temp.equals(null)) break;
                     }
                 }
             }

@@ -1,6 +1,5 @@
 package Model;
 
-import org.apache.sling.commons.json.JSONObject;
 import org.codehaus.jackson.JsonNode;
 
 import java.util.ArrayList;
@@ -16,28 +15,22 @@ public class Instance {
     private JsonNode json;
     private HashMap<String, Integer> wordCounts;
     private long time;
-    private double svdX = 0.0;
-    private double svdY = 0.0;
 
-    public Instance(String _id, String _words, JsonNode _json){
+    public Instance(String _id, JsonNode _json){
         this.time = System.currentTimeMillis();
         this.id = _id;
         this.wordCounts = new HashMap<>();
         this.json = _json;
         this.sentence = this.json.get("text").getTextValue();
-        for(String word : _words.split("\\W")) {
-            if(!word.isEmpty()) {
-                if (this.wordCounts.containsKey(word)) {
-                    this.wordCounts.put(word, this.wordCounts.get(word) + 1);
-                } else {
-                    this.wordCounts.put(word, 1);
-                }
-            }
-        }
-    }
-
-    public HashMap<String, Integer> getWordCounts(){
-        return this.wordCounts;
+//        for(String word : _words.split("\\W")) {
+//            if(!word.isEmpty()) {
+//                if (this.wordCounts.containsKey(word)) {
+//                    this.wordCounts.put(word, this.wordCounts.get(word) + 1);
+//                } else {
+//                    this.wordCounts.put(word, 1);
+//                }
+//            }
+//        }
     }
 
     public String getId(){
@@ -48,24 +41,14 @@ public class Instance {
         return this.time;
     }
 
-    public String getSentence(){ return this.sentence;}
-
-    public double getSvdX(){ return svdX;}
-
-    public double getSvdY(){ return svdY;}
-
-    public void setSVDVariable(double _X, double _Y){
-        svdX = _X;
-        svdY = _Y;
-    }
 
     public double euclideanDistance(Instance i){
-        return Math.sqrt(Math.abs(svdX - i.getSvdX()) + Math.abs(svdY - i.getSvdY()));
+        return 0.0;
     }
 
     @Override
     public String toString() {
-        String ret = "{id : "+ this.id + " sentence : "+ this.sentence + "}";
+        String ret = "test";
         return ret;
     }
 }

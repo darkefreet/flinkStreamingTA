@@ -2,7 +2,6 @@ package Streamprocess;
 
 import Model.Instance;
 import Preprocess.TweetFilter;
-import Preprocess.NormalizeSentence;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -36,20 +35,12 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
                 TweetFilter tweetFilter = new TweetFilter(config);
                 if(tweetFilter.filter(value)){
-                    String sentence = jsonNode.get("text").getTextValue().toLowerCase();
-                    NormalizeSentence normalizer = new NormalizeSentence(sentence);
-                    out.collect(new Instance(jsonNode.get("id").toString(),normalizer.getSentence(),jsonNode));
+                    out.collect(new Instance(jsonNode.get(config.getString("data.id")).toString(),jsonNode));
                 }
                 break;
             }
             default:{
-                JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-                TweetFilter tweetFilter = new TweetFilter(config);
-                if(tweetFilter.filter(value)){
-                    String sentence = jsonNode.get("text").getTextValue().toLowerCase();
-                    NormalizeSentence normalizer = new NormalizeSentence(sentence);
-                    out.collect(new Instance(jsonNode.get("id").toString(),normalizer.getSentence(),jsonNode));
-                }
+                out.collect(null);
             }
         }
 
