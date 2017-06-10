@@ -10,6 +10,6 @@ import java.io.IOException;
 public class testClass {
     public static void main(String[] args) throws IOException {
         DocumentsSVD d = new DocumentsSVD("resource/news","kategori","isi");
-        d.search("bulutangkis");
+        d.search("ahok djarot dan sandiaga");
     }
 }
