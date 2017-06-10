@@ -11,6 +11,12 @@
         <port>4542</port>
     </source>
 
+    <textProcess>
+        <anyText>true</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
+        <label>kategori</label><!-- JSON label for the LSD document category-->
+        <resource>isi</resource><!-- JSON label for the LSD document resource to build the model -->
+    </textProcess>
+
     <!--DATA TYPE AND FILTERS-->
     <data>
         <type>tweet</type>

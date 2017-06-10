@@ -1,13 +1,175 @@
 package Preprocess;
 
+import Model.Document;
+import com.aliasi.matrix.SvdMatrix;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by wilhelmus on 07/06/17.
  */
 public class DocumentsSVD {
 
     private double termDocumentMatrix[][];
+    private ArrayList<Document> documents;
+    private Set<String> setOfTerms;
+    private String[] terms;
+    private SvdMatrix svdMatrix;
+    private int maxFactors;
+    private double featureInit;
+    private double initialLearningRate;
+    private int annealingRate;
+    private double regularization;
+    private double minImprovement;
+    private int minEpochs;
+    private int maxEpochs;
+    private double[] scales;
+    private double[][] termVectors;
+    private double[][] docVectors;
 
-    public DocumentsSVD(){
+    static final int NUM_FACTORS = 2;
+
+    public DocumentsSVD(String path,String label, String isi) throws IOException {
+
+        //initialize value
+        maxFactors = 2;
+        featureInit = 0.01;
+        initialLearningRate = 0.005;
+        annealingRate = 1000;
+        regularization = 0.00;
+        minImprovement = 0.0000;
+        minEpochs = 10;
+        maxEpochs = 50000;
+        svdMatrix = null;
+        scales = null;
+        termVectors = null;
+        docVectors = null;
+        documents = new ArrayList<>();
+        setOfTerms = new HashSet<>();
+
+
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+        ObjectMapper jsonParser = new ObjectMapper();
+
+        for (File file : listOfFiles) {
+            if (file.isFile()) {
+                URL url = new URL("file:"+file.getCanonicalPath());
+                JsonNode json = jsonParser.readValue(url, JsonNode.class);
+                Document doc= new Document();
+                doc.setLabel(json.get(label).getTextValue());
+                String res = json.get(isi).getTextValue().toLowerCase();
+                NormalizeSentence normalize = new NormalizeSentence(res);
+                doc.setResource(normalize.getSentence());
+                doc.countWords();
+                documents.add(doc);
+            }
+        }
+
+        //COLLECT ALL THE TERMS AND COUNT TERMS PER DOCUMENT
+        for(Document doc: documents){
+            for(String s:doc.getWordCounts().keySet()){
+                setOfTerms.add(s);
+            }
+            terms = setOfTerms.toArray(new String[setOfTerms.size()]);
+        }
+
+        //MAKE TERM DOCUMENT MATRIX
+        termDocumentMatrix = new double[terms.length][documents.size()];
+        int i = 0;
+        for (String term : terms) {
+            for (int j = 0; j < documents.size(); j++) {
+                if (documents.get(j).getWordCounts().containsKey(term)) {
+                    termDocumentMatrix[i][j] = documents.get(j).getWordCounts().get(term);
+                } else {
+                    termDocumentMatrix[i][j] = 0;
+                }
+            }
+            i++;
+        }
+
+        svdMatrix = SvdMatrix.svd(termDocumentMatrix, maxFactors, featureInit, initialLearningRate, annealingRate, regularization, null, minImprovement, minEpochs, maxEpochs);
+        scales = svdMatrix.singularValues();
+        termVectors = svdMatrix.leftSingularVectors();
+        docVectors = svdMatrix.rightSingularVectors();
+
+        printTermDocumentMatrix();
+
 
     }
+
+    public void printTermDocumentMatrix(){
+        if(!termDocumentMatrix.equals(null)){
+            for(int i = 0; i<termDocumentMatrix.length;i++){
+                System.out.print("[ ");
+                for(int j = 0; j<termDocumentMatrix[i].length-1;j++){
+                    System.out.print(termDocumentMatrix[i][j] + " , ");
+                }
+                System.out.println(termDocumentMatrix[i][termDocumentMatrix[i].length-1] + " ]");
+            }
+        }
+    }
+
+    private double dotProduct(double[] xs, double[] ys, double[] scales) {
+        double sum = 0.0;
+        for (int k = 0; k < xs.length; ++k)
+            sum += xs[k] * ys[k] * scales[k];
+        return sum;
+    }
+
+    private double cosine(double[] xs, double[] ys, double[] scales) {
+        double product = 0.0;
+        double xsLengthSquared = 0.0;
+        double ysLengthSquared = 0.0;
+        for (int k = 0; k < xs.length; ++k) {
+            double sqrtScale = Math.sqrt(scales[k]);
+            double scaledXs = sqrtScale * xs[k];
+            double scaledYs = sqrtScale * ys[k];
+            xsLengthSquared += scaledXs * scaledXs;
+            ysLengthSquared += scaledYs * scaledYs;
+            product += scaledXs * scaledYs;
+        }
+        return product / Math.sqrt(xsLengthSquared * ysLengthSquared);
+    }
+
+    public void search(String arg) {
+        NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
+        String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
+
+        double[] queryVector = new double[NUM_FACTORS];
+        Arrays.fill(queryVector,0.0);
+
+        for (String term : queryTerms) {
+            addTermVector(term, queryVector);
+        }
+
+        System.out.println("\nDOCUMENT SCORES VS. QUERY");
+        for (int j = 0; j < docVectors.length; ++j) {
+//            double score = dotProduct(queryVector,docVectors[j],scales);
+             double score = cosine(queryVector,docVectors[j],scales);
+            System.out.printf("  %d: % 5.2f  %s\n",j,score,documents.get(j).getLabel());
+        }
+    }
+
+    private void addTermVector(String term, double[] queryVector) {
+        int i = 0;
+        for (String t : terms) {
+            if (t.equals(term)) {
+                for (int j = 0; j < NUM_FACTORS; ++j) {
+                    queryVector[j] += termVectors[i][j];
+                }
+                return;
+            }
+            i++;
+        }
+    }
+
 }

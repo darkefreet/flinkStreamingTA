@@ -14,8 +14,8 @@ public class NormalizeSentence {
         formalizer.initStopword();
         sentence = formalizer.normalizeSentence(_sentence);
         sentence = formalizer.deleteStopword(sentence);
-        IndonesianStemmer stemmer = new IndonesianStemmer();
-        sentence = stemmer.stemSentence(sentence);
+//        IndonesianStemmer stemmer = new IndonesianStemmer();
+//        sentence = stemmer.stemSentence(sentence);
     }
 
     public String getSentence(){
