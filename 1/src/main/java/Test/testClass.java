@@ -9,7 +9,8 @@ import java.io.IOException;
  */
 public class testClass {
     public static void main(String[] args) throws IOException {
-        DocumentsSVD d = new DocumentsSVD("resource/news","kategori","isi");
-        d.search("bulutangkis");
+        DocumentsSVD d = new DocumentsSVD();
+        d.makeSVDModel("resource/news","kategori","isi");
+        System.out.println(d.search("bulutangkis","cosine"));
     }
 }

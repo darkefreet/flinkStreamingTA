@@ -1,4 +1,4 @@
-package Model;
+package Model.DocumentModelling;
 
 import java.util.HashMap;
 

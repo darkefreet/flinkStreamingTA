@@ -1,7 +1,7 @@
 package Streamprocess;
 
-import Model.Instance;
-import Preprocess.TweetFilter;
+import Model.Instances.Instance;
+import Preprocess.StreamFilter;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -33,8 +33,8 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
         switch(config.getString("data.type")){
             case "tweet":{
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-                TweetFilter tweetFilter = new TweetFilter(config);
-                if(tweetFilter.filter(value)){
+                StreamFilter streamFilter = new StreamFilter(config);
+                if(streamFilter.filter(value)){
                     out.collect(new Instance(jsonNode.get(config.getString("data.id")).toString(),jsonNode));
                 }
                 break;

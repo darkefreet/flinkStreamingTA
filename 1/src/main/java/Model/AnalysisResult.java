@@ -1,10 +1,10 @@
 package Model;
 
+import Model.Clustering.Cluster;
+import Model.Instances.Instance;
 import com.aliasi.matrix.SvdMatrix;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by wilhelmus on 17/05/17.

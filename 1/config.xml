@@ -11,17 +11,19 @@
         <port>4542</port>
     </source>
 
-    <textProcess>
+    <textProcess><!--FOR LSD Calculation purposes-->
         <anyText>true</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
+        <dataPath>resource/news/</dataPath><!-- path for documents to make SVD Model-->
         <label>kategori</label><!-- JSON label for the LSD document category-->
         <resource>isi</resource><!-- JSON label for the LSD document resource to build the model -->
+        <function>cosine</function><!-- To calculate singular value decomposition. options: "cosine" | "dot" -->
     </textProcess>
 
     <!--DATA TYPE AND FILTERS-->
     <data>
         <type>tweet</type>
         <id>id</id>
-        <tweetFilters>
+        <filtersConfiguration>
             <filter>
                 <dataType>string</dataType>
                 <attribute>lang</attribute>
@@ -39,7 +41,7 @@
                 <value>0</value>
                 <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
-        </tweetFilters>
+        </filtersConfiguration>
     </data>
 
     <!--KEY FOR STREAM DATA-->
@@ -56,19 +58,27 @@
     <dataMining>
         <type>clustering</type>
         <algorithm>dbscan</algorithm>
+        <maxDistance>2500.0</maxDistance>
+        <minClusters>3</minClusters>
         <distance>euclidean</distance>
         <attributes>
             <attribute>
-                <field>text</field>
-                <type>text</type>
-                <weight>1.0</weight><!--for standardized attribute weight-->
+                <path>text</path>
+                <type>text</type><!--options : "text" | "numeric" -->
+                <weight>1000.0</weight><!--for standardized attribute weight-->
+                <svdFunction>cosine</svdFunction>
+            </attribute>
+            <attribute>
+                <path>user.followers_count</path>
+                <type>numeric</type>
+                <weight>1.0</weight>
             </attribute>
         </attributes>
     </dataMining>
 
     <!--WINDOW CONFIGURATION-->
     <window>
-        <type>sliding</type><!--options: tumbling / sliding / session -->
+        <type>tumbling</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>

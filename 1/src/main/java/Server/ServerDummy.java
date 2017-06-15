@@ -33,7 +33,7 @@ public class ServerDummy implements Runnable{
                     BufferedReader br = new BufferedReader(isr);
             ) {
                 while ((line = br.readLine()) != null) {
-                    Thread.sleep(ThreadLocalRandom.current().nextInt(500,2000));
+                    Thread.sleep(ThreadLocalRandom.current().nextInt(200,600));
                     System.out.println(line);
                     pstream.println(line);
                 }

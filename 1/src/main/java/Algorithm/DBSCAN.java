@@ -1,9 +1,11 @@
 package Algorithm;
 
-import Model.Cluster;
-import Model.Instance;
+import Model.Clustering.Cluster;
+import Model.Instances.Instance;
+import Model.Instances.TestClusteringInstance;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by wilhelmus on 27/05/17.
@@ -11,21 +13,20 @@ import java.util.ArrayList;
 public class DBSCAN {
     private double epsilon = 1f;
     private int minNumCluster = 2;
-    private ArrayList<Instance> collection;
-    private ArrayList<Cluster> clusters;
-    ArrayList<Instance> visited;
+    private ArrayList<TestClusteringInstance> collection;
+    private List<Cluster> clusters;
+    ArrayList<TestClusteringInstance> visited;
 
-    public DBSCAN(ArrayList<Instance> _collection, double newDistance, int numCluster){
+    public DBSCAN(ArrayList<TestClusteringInstance> _collection, double newDistance, int numCluster){
         epsilon = newDistance;
         minNumCluster = numCluster;
         collection = _collection;
         clusters = new ArrayList<>();
     }
 
-    public ArrayList<Cluster> getClusters() {
+    public List<Cluster> getClusters() {
         return clusters;
     }
-
     public void setMaxDistance(double newDistance){
         epsilon = newDistance;
     }
@@ -41,8 +42,8 @@ public class DBSCAN {
         return ret;
     }
 
-    private ArrayList<Instance> getNeighbours(Instance inputValue) {
-        ArrayList<Instance> neighbours = new ArrayList<>();
+    private ArrayList<TestClusteringInstance> getNeighbours(TestClusteringInstance inputValue) {
+        ArrayList<TestClusteringInstance> neighbours = new ArrayList<>();
         for(int i=0; i<collection.size(); i++) {
             if ((inputValue.euclideanDistance(collection.get(i)) <= epsilon) & inputValue.getId()!=collection.get(i).getId()) {
                 neighbours.add(collection.get(i));
@@ -52,15 +53,15 @@ public class DBSCAN {
         return neighbours;
     }
 
-    public void expandCluster(Instance P,Cluster c, ArrayList<Instance> neighbors){
+    private void expandCluster(TestClusteringInstance P, Cluster c, ArrayList<TestClusteringInstance> neighbors){
         c.addInstance(P);
         for(int i = 0; i<neighbors.size();i++){
             if(neighbors.get(i).getId()!=P.getId()){
                 if(!visited.contains(neighbors.get(i))){
                     visited.add(neighbors.get(i));
-                    ArrayList<Instance> newNeighbors = getNeighbours(neighbors.get(i));
+                    ArrayList<TestClusteringInstance> newNeighbors = getNeighbours(neighbors.get(i));
                     if(newNeighbors.size()>= minNumCluster){
-                        for(Instance j : newNeighbors){
+                        for(TestClusteringInstance j : newNeighbors){
                             if(!neighbors.contains(j)){
                                 neighbors.add(j);
                             }
@@ -78,11 +79,11 @@ public class DBSCAN {
     }
 
     public void performCluster(){
-        visited = new ArrayList<Instance>();
-        for (Instance i : collection){
+        visited = new ArrayList<TestClusteringInstance>();
+        for (TestClusteringInstance i : collection){
             if(!visited.contains(i)){
                 visited.add(i);
-                ArrayList<Instance> neighbor = getNeighbours(i);
+                ArrayList<TestClusteringInstance> neighbor = getNeighbours(i);
                 if(neighbor.size() >= minNumCluster){
                     Cluster newCluster = new Cluster();
                     expandCluster(i,newCluster,neighbor);

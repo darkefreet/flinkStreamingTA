@@ -18,8 +18,9 @@ package flinkstreaming;
  * limitations under the License.
  */
 
-import Model.AnalysisResult;
-import Model.Instance;
+import Model.DocumentModelling.Document;
+import Model.Instances.Instance;
+import Preprocess.DocumentsSVD;
 import Streamprocess.StreamParser;
 import Streamprocess.WindowStreamProcess;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -32,6 +33,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.twitter.TwitterSource;
 import org.apache.flink.streaming.util.serialization.SerializationSchema;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 
@@ -110,24 +112,31 @@ public class StreamingJob {
 			}
 		};
 
-		DataStream<AnalysisResult> windowedStream;
+		DataStream<String> windowedStream;
 		Long windowTime = 0L;
 		Long overlapTime = 0L;
 		windowTime = windowTime + (config.getInt("window.size.hours")*3600) + (config.getInt("window.size.minutes")*60) + (config.getInt("window.size.seconds"));
 		overlapTime = overlapTime + (config.getInt("window.overlap.hours")*3600) + (config.getInt("window.overlap.minutes")*60) + (config.getInt("window.overlap.seconds"));
+
+		DocumentsSVD docSVD = new DocumentsSVD();
+		if(config.getString("textProcess.anyText").equals("true")){
+			docSVD.makeSVDModel(config.getString("textProcess.dataPath"),config.getString("textProcess.label"),config.getString("textProcess.resource"));
+		}
+		
 		switch(config.getString("window.type")){
 			case "tumbling": {
 				switch (config.getString("window.time")) {
 					case "event": {
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(TumblingEventTimeWindows.of(Time.seconds(windowTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 					default: {
+
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(TumblingProcessingTimeWindows.of(Time.seconds(windowTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 				}
@@ -138,13 +147,13 @@ public class StreamingJob {
 					case "event": {
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(SlidingEventTimeWindows.of(Time.seconds(windowTime), Time.seconds(overlapTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 					default: {
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(SlidingProcessingTimeWindows.of(Time.seconds(windowTime), Time.seconds(overlapTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 				}
@@ -155,13 +164,13 @@ public class StreamingJob {
 					case "event": {
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(EventTimeSessionWindows.withGap(Time.seconds(windowTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 					default: {
 						windowedStream = streamOutput.keyBy(keySelect)
 								.window(ProcessingTimeSessionWindows.withGap(Time.seconds(windowTime)))
-								.apply(new WindowStreamProcess());
+								.apply(new WindowStreamProcess(docSVD,config));
 						break;
 					}
 				}
@@ -179,10 +188,10 @@ public class StreamingJob {
 				break;
 			}
 			case "socket":{
-				windowedStream.writeToSocket(config.getString("windowSink.ip"), config.getInt("windowSink.port"), new SerializationSchema<AnalysisResult>() {
+				windowedStream.writeToSocket(config.getString("windowSink.ip"), config.getInt("windowSink.port"), new SerializationSchema<String>() {
 					@Override
-					public byte[] serialize(AnalysisResult analysisResult) {
-						return analysisResult.toString().getBytes();
+					public byte[] serialize(String s) {
+						return s.getBytes();
 					}
 				});
 				break;

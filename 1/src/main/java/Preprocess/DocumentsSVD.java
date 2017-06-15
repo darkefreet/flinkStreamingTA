@@ -1,6 +1,7 @@
 package Preprocess;
 
-import Model.Document;
+import Model.DocumentModelling.ClassifyResult;
+import Model.DocumentModelling.Document;
 import com.aliasi.matrix.SvdMatrix;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -8,10 +9,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by wilhelmus on 07/06/17.
@@ -34,11 +32,11 @@ public class DocumentsSVD {
     private double[] scales;
     private double[][] termVectors;
     private double[][] docVectors;
+    private boolean hasModel;
 
     static final int NUM_FACTORS = 2;
 
-    public DocumentsSVD(String path,String label, String isi) throws IOException {
-
+    public DocumentsSVD(){
         //initialize value
         maxFactors = 2;
         featureInit = 0.01;
@@ -54,8 +52,15 @@ public class DocumentsSVD {
         docVectors = null;
         documents = new ArrayList<>();
         setOfTerms = new HashSet<>();
+        hasModel = false;
+    }
 
+    public boolean doesHasModel(){
+        return hasModel;
+    }
 
+    public void makeSVDModel(String path,String label, String isi) throws IOException {
+        hasModel = true;
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         ObjectMapper jsonParser = new ObjectMapper();
@@ -100,14 +105,11 @@ public class DocumentsSVD {
         scales = svdMatrix.singularValues();
         termVectors = svdMatrix.leftSingularVectors();
         docVectors = svdMatrix.rightSingularVectors();
-
-        printTermDocumentMatrix();
-
+//        printTermDocumentMatrix();
 
     }
-
     public void printTermDocumentMatrix(){
-        if(!termDocumentMatrix.equals(null)){
+        if(!termDocumentMatrix.equals(null) && hasModel){
             for(int i = 0; i<termDocumentMatrix.length;i++){
                 System.out.print("[ ");
                 for(int j = 0; j<termDocumentMatrix[i].length-1;j++){
@@ -140,23 +142,60 @@ public class DocumentsSVD {
         return product / Math.sqrt(xsLengthSquared * ysLengthSquared);
     }
 
-    public void search(String arg) {
-        NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
-        String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
+    public String classify(String arg, String function) throws IOException {
+        String ret = "";
+        if(hasModel) {
+            NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
+            String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
 
-        double[] queryVector = new double[NUM_FACTORS];
-        Arrays.fill(queryVector,0.0);
+            double[] queryVector = new double[NUM_FACTORS];
+            Arrays.fill(queryVector, 0.0);
 
-        for (String term : queryTerms) {
-            addTermVector(term, queryVector);
+            for (String term : queryTerms) {
+                addTermVector(term, queryVector);
+            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> a = new ArrayList<>();
+            for (int j = 0; j < docVectors.length; ++j) {
+                double score;
+                if(function.equals("dot")) {
+                    score = dotProduct(queryVector, docVectors[j], scales);
+                }else {
+                    score = cosine(queryVector, docVectors[j], scales);
+                }
+                ClassifyResult c = new ClassifyResult(score,documents.get(j).getLabel());
+                a.add(objectMapper.writeValueAsString(c));
+            }
+            ret = objectMapper.writeValueAsString(a);
         }
+        return ret;
+    }
 
-        System.out.println("\nDOCUMENT SCORES VS. QUERY");
-        for (int j = 0; j < docVectors.length; ++j) {
-//            double score = dotProduct(queryVector,docVectors[j],scales);
-             double score = cosine(queryVector,docVectors[j],scales);
-            System.out.printf("  %d: % 5.2f  %s\n",j,score,documents.get(j).getLabel());
+    public ArrayList<Double> search(String arg,String function){
+        ArrayList<Double> ret = new ArrayList<>();
+        if(hasModel) {
+            NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
+            String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
+
+            double[] queryVector = new double[NUM_FACTORS];
+            Arrays.fill(queryVector, 0.0);
+
+            for (String term : queryTerms) {
+                addTermVector(term, queryVector);
+            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> a = new ArrayList<>();
+            for (int j = 0; j < docVectors.length; ++j) {
+                double score;
+                if(function.equals("dot")) {
+                    score = dotProduct(queryVector, docVectors[j], scales);
+                }else {
+                    score = cosine(queryVector, docVectors[j], scales);
+                }
+                ret.add(new Double(score));
+            }
         }
+        return ret;
     }
 
     private void addTermVector(String term, double[] queryVector) {
@@ -171,5 +210,7 @@ public class DocumentsSVD {
             i++;
         }
     }
+
+
 
 }

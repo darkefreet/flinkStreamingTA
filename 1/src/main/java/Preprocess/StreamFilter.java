@@ -12,12 +12,12 @@ import java.util.List;
  * Created by wilhelmus on 19/04/17.
  */
 
-public class TweetFilter {
+public class StreamFilter {
 
     private ObjectMapper jsonParser;
     private XMLConfiguration config;
 
-    public TweetFilter(XMLConfiguration _config)
+    public StreamFilter(XMLConfiguration _config)
     {
         jsonParser = new ObjectMapper();
         config = _config;
@@ -28,7 +28,7 @@ public class TweetFilter {
         if(jsonParser ==null){
             jsonParser = new ObjectMapper();
         }
-        List<HierarchicalConfiguration> hconfig = config.configurationsAt("data.tweetFilters.filter");
+        List<HierarchicalConfiguration> hconfig = config.configurationsAt("data.filtersConfiguration.filter");
         boolean ret = true;
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
         for (HierarchicalConfiguration h : hconfig){
