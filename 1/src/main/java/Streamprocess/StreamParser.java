@@ -17,11 +17,11 @@ import java.io.IOException;
  */
 public class StreamParser implements FlatMapFunction<String, Instance> {
 
-    private static XMLConfiguration config;
+    private static transient XMLConfiguration config;
     private transient ObjectMapper jsonParser;
 
-    public StreamParser() throws ConfigurationException {
-        config = new XMLConfiguration("config.xml");
+    public StreamParser(XMLConfiguration _config) throws ConfigurationException {
+        config = _config;
     }
 
     @Override

@@ -8,14 +8,14 @@ import java.util.List;
 /**
  * Created by wilhelmus on 13/06/17.
  */
-public class ClassifyResult {
+public class ClassifyDocumentsResult {
     private String label;
     private double score;
 
-    public ClassifyResult(){
+    public ClassifyDocumentsResult(){
     }
 
-    public ClassifyResult(double _score, String _label){
+    public ClassifyDocumentsResult(double _score, String _label){
         score = _score;
         label = _label;
     }

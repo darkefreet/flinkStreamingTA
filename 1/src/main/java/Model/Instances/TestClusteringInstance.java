@@ -1,33 +1,43 @@
 package Model.Instances;
 
+import Preprocess.JSONPathTraverse;
 import org.codehaus.jackson.JsonNode;
-
-import java.util.ArrayList;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
 /**
  * Created by wilhelmus on 13/06/17.
  */
 public class TestClusteringInstance extends Instance {
 
-    private String text;
+    private JsonNode data;
 
     public TestClusteringInstance(){
         super();
-        text = getJson().get("text").getValueAsText();
+        ObjectMapper jsonParser = new ObjectMapper();
+        data = jsonParser.createObjectNode();
     }
 
     public TestClusteringInstance(String _id, JsonNode _json){
         super(_id,_json);
-        text = getJson().get("text").getValueAsText();
+        ObjectMapper jsonParser = new ObjectMapper();
+        data = jsonParser.createObjectNode();
     }
 
     public TestClusteringInstance(Instance _i){
         super(_i.getId(),_i.getJson());
-        text = getJson().get("text").getValueAsText();
+        ObjectMapper jsonParser = new ObjectMapper();
+        data = jsonParser.createObjectNode();
     }
 
-    public String getText(){
-        return text;
+    public void addToData(String path){
+        JSONPathTraverse JsonPath = new JSONPathTraverse();
+        JsonNode dummy = JsonPath.solve(path,getJson());
+        ((ObjectNode)data).put(path,dummy);
+    }
+
+    public JsonNode getData(){
+        return data;
     }
 
 }

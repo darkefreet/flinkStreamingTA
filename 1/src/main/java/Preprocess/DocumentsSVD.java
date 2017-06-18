@@ -1,6 +1,6 @@
 package Preprocess;
 
-import Model.DocumentModelling.ClassifyResult;
+import Model.DocumentModelling.ClassifyDocumentsResult;
 import Model.DocumentModelling.Document;
 import com.aliasi.matrix.SvdMatrix;
 import org.codehaus.jackson.JsonNode;
@@ -163,7 +163,7 @@ public class DocumentsSVD {
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
                 }
-                ClassifyResult c = new ClassifyResult(score,documents.get(j).getLabel());
+                ClassifyDocumentsResult c = new ClassifyDocumentsResult(score,documents.get(j).getLabel());
                 a.add(objectMapper.writeValueAsString(c));
             }
             ret = objectMapper.writeValueAsString(a);

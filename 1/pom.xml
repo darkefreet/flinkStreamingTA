@@ -113,8 +113,22 @@ under the License.
 			<artifactId>httpclient</artifactId>
 			<version>4.3.4</version>
 		</dependency>
-		
-	</dependencies>
+		<dependency>
+			<groupId>com.satori</groupId>
+			<artifactId>satori-rtm-sdk</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-kafka-0.9_2.10</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.10</artifactId>
+            <version>0.10.0.1</version>
+        </dependency>
+    </dependencies>
 
 	<profiles>
 		<profile>

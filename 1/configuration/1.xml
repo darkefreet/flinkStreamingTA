@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <!--PICK ONE SOURCE-->
-    <!--<source>-->
-        <!--<name>twitter</name>-->
-        <!--<properties-file>twitter.properties</properties-file>-->
-    <!--</source>-->
+    <source>
+        <name>twitter</name>
+        <properties-file>twitter.properties</properties-file>
+    </source>
     <!--<source>-->
         <!--<name>bitcoin</name>-->
         <!--<properties-file>bitcoin.properties</properties-file>-->
     <!--</source>-->
-    <source>
-        <name>socket</name>
-        <ip>localhost</ip>
-        <port>4542</port>
-    </source>
+    <!--<source>-->
+        <!--<name>socket</name>-->
+        <!--<ip>localhost</ip>-->
+        <!--<port>4542</port>-->
+    <!--</source>-->
 
     <textProcess><!--FOR LSD Calculation purposes-->
         <anyText>true</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
@@ -54,8 +54,8 @@
         <value>1</value>
     </keyBy>
     <!--<keyBy>-->
-        <!--<type>object</type>-->
-        <!--<function>getId</function>-->
+    <!--<type>object</type>-->
+    <!--<function>getId</function>-->
     <!--</keyBy>-->
 
     <!--DATA MINING CONFIGURATION-->
@@ -104,22 +104,24 @@
     <!--SINK CONFIGURATION-->
     <windowSink>
         <type>kafka</type>
+        <topic>clustering-text</topic>
+        <ipPort>localhost:9092</ipPort>
     </windowSink>
     <!--<windowSink>-->
-        <!--<type>print</type>-->
+    <!--<type>print</type>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>csv</type>-->
-        <!--<path>csvOutput</path>-->
+    <!--<type>csv</type>-->
+    <!--<path>csvOutput</path>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>text</type>-->
-        <!--<path>textOutput</path>-->
+    <!--<type>text</type>-->
+    <!--<path>textOutput</path>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>socket</type>-->
-        <!--<ip>localhost</ip>-->
-        <!--<port>4543</port>-->
+    <!--<type>socket</type>-->
+    <!--<ip>localhost</ip>-->
+    <!--<port>4543</port>-->
     <!--</windowSink>-->
 
 </configuration>
