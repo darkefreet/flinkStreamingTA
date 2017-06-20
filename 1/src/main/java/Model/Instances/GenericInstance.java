@@ -8,32 +8,41 @@ import org.codehaus.jackson.node.ObjectNode;
 /**
  * Created by wilhelmus on 13/06/17.
  */
-public class TestClusteringInstance extends Instance {
+public class GenericInstance extends Instance {
 
     private JsonNode data;
 
-    public TestClusteringInstance(){
+    public GenericInstance(){
         super();
         ObjectMapper jsonParser = new ObjectMapper();
         data = jsonParser.createObjectNode();
     }
 
-    public TestClusteringInstance(String _id, JsonNode _json){
+    public GenericInstance(String _id, JsonNode _json){
         super(_id,_json);
         ObjectMapper jsonParser = new ObjectMapper();
         data = jsonParser.createObjectNode();
     }
 
-    public TestClusteringInstance(Instance _i){
+    public GenericInstance(Instance _i){
         super(_i.getId(),_i.getJson());
         ObjectMapper jsonParser = new ObjectMapper();
         data = jsonParser.createObjectNode();
     }
 
     public void addToData(String path){
-        JSONPathTraverse JsonPath = new JSONPathTraverse();
-        JsonNode dummy = JsonPath.solve(path,getJson());
-        ((ObjectNode)data).put(path,dummy);
+        if(path.equals("*")){
+            ((ObjectNode)data).put(path,getJson());
+        }
+        else {
+            JSONPathTraverse JsonPath = new JSONPathTraverse();
+            JsonNode dummy = JsonPath.solve(path, getJson());
+            ((ObjectNode) data).put(path, dummy);
+        }
+    }
+
+    public void addNewData(String path, String value){
+        ((ObjectNode)data).put(path,value);
     }
 
     public JsonNode getData(){

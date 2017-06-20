@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <!--PICK ONE SOURCE-->
-    <!--<source>-->
-        <!--<name>twitter</name>-->
-        <!--<properties-file>twitter.properties</properties-file>-->
-    <!--</source>-->
-    <!--<source>-->
-        <!--<name>bitcoin</name>-->
-        <!--<properties-file>bitcoin.properties</properties-file>-->
-    <!--</source>-->
     <source>
-        <name>socket</name>
-        <ip>localhost</ip>
-        <port>4542</port>
+        <name>twitter</name>
+        <properties-file>twitter.properties</properties-file>
     </source>
+    <!--<source>-->
+    <!--<name>bitcoin</name>-->
+    <!--<properties-file>bitcoin.properties</properties-file>-->
+    <!--</source>-->
+    <!--<source>-->
+    <!--<name>socket</name>-->
+    <!--<ip>localhost</ip>-->
+    <!--<port>4542</port>-->
+    <!--</source>-->
 
     <textProcess><!--FOR LSD Calculation purposes-->
         <anyText>true</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
@@ -25,7 +25,7 @@
 
     <!--DATA TYPE AND FILTERS-->
     <data>
-        <type>tweet</type>
+        <type>json</type>
         <id>id</id>
         <filtersConfiguration>
             <filter>
@@ -54,18 +54,13 @@
         <value>1</value>
     </keyBy>
     <!--<keyBy>-->
-        <!--<type>object</type>-->
-        <!--<function>getId</function>-->
+    <!--<type>object</type>-->
+    <!--<function>getId</function>-->
     <!--</keyBy>-->
 
     <!--DATA MINING CONFIGURATION-->
     <dataMining>
-        <processingClass>Streamprocess.WindowProcess.WindowClusteringProcess</processingClass>
-        <type>clustering</type>
-        <algorithm>dbscan</algorithm>
-        <maxDistance>2500.0</maxDistance>
-        <minClusters>3</minClusters>
-        <distance>euclidean</distance>
+        <processingClass>Streamprocess.WindowProcess.WindowClassificationTextProcess</processingClass>
         <attributes>
             <attribute>
                 <path>text</path>
@@ -73,15 +68,9 @@
                 <weight>1000.0</weight><!--for standardized attribute weight-->
                 <svdFunction>cosine</svdFunction>
             </attribute>
-            <attribute>
-                <path>user.followers_count</path>
-                <type>numeric</type>
-                <weight>1.0</weight>
-            </attribute>
         </attributes>
         <resultsData>
             <path>text</path>
-            <path>user.followers_count</path>
         </resultsData>
     </dataMining>
 
@@ -91,8 +80,8 @@
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>
-            <minutes>1</minutes>
-            <seconds>0</seconds>
+            <minutes>0</minutes>
+            <seconds>10</seconds>
         </size>
         <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
             <hours>0</hours>
@@ -104,22 +93,24 @@
     <!--SINK CONFIGURATION-->
     <windowSink>
         <type>kafka</type>
+        <topic>tweet-classification</topic>
+        <ipPort>localhost:9092</ipPort>
     </windowSink>
     <!--<windowSink>-->
-        <!--<type>print</type>-->
+    <!--<type>print</type>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>csv</type>-->
-        <!--<path>csvOutput</path>-->
+    <!--<type>csv</type>-->
+    <!--<path>csvOutput</path>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>text</type>-->
-        <!--<path>textOutput</path>-->
+    <!--<type>text</type>-->
+    <!--<path>textOutput</path>-->
     <!--</windowSink>-->
     <!--<windowSink>-->
-        <!--<type>socket</type>-->
-        <!--<ip>localhost</ip>-->
-        <!--<port>4543</port>-->
+    <!--<type>socket</type>-->
+    <!--<ip>localhost</ip>-->
+    <!--<port>4543</port>-->
     <!--</windowSink>-->
 
 </configuration>

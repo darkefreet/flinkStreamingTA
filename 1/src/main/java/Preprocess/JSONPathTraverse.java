@@ -12,14 +12,14 @@ public class JSONPathTraverse {
     }
 
     public JsonNode solve(String path, JsonNode jsonNode){
-        JsonNode temp = null;
+        JsonNode temp;
         if (path.contains(".")) {
             String[] attributes = path.split("\\.");
             temp = jsonNode.get(attributes[0]);
             if (attributes.length > 1) {
                 for (int i = 1; i < attributes.length; i++) {
                     temp = temp.get(attributes[i]);
-                    if (temp.equals(null)) break;
+                    if (temp==null) break;
                 }
             }
         } else {

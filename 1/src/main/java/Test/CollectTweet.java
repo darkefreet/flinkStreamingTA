@@ -41,8 +41,9 @@ public class CollectTweet {
                     }
                 });
 
-        streamOutput.writeAsText("twitter-indo.txt").setParallelism(1);
+//        streamOutput.writeAsText("twitter-indo.txt").setParallelism(1);
 
+        streamOutput.print();
         env.execute();
     }
 }

@@ -18,25 +18,12 @@ package flinkstreaming;
  * limitations under the License.
  */
 
-import Model.DocumentModelling.Document;
-import Model.Instances.Instance;
-import Preprocess.DocumentsSVD;
-import Streamprocess.StreamParser;
-import Streamprocess.WindowStreamProcess;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.assigners.*;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
-import org.apache.flink.streaming.connectors.twitter.TwitterSource;
-import org.apache.flink.streaming.util.serialization.SerializationSchema;
-import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,17 +51,37 @@ import java.util.concurrent.Future;
  */
 public class StreamingJob {
 
-	private static DataStream<String> source;
-	private static XMLConfiguration config;
+
 
 	public static void main(String[] args) throws Exception {
-		config = new XMLConfiguration("config.xml");
 
-		ExecutorService executor = Executors.newFixedThreadPool(10);
-		Future future = executor.submit(new StreamProcess(config));
-		future.get();
+		// set up the execution environment
+		final StreamExecutionEnvironment env = StreamExecutionEnvironment
+				.getExecutionEnvironment();
 
+		ArrayList<XMLConfiguration> configs = new ArrayList<>();
+
+		File folder = new File("configuration");
+		File[] listOfFiles = folder.listFiles();
+		ExecutorService executor = Executors.newFixedThreadPool(listOfFiles.length);
+		for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile()) {
+				configs.add(new XMLConfiguration(listOfFiles[i].getCanonicalPath()));
+			}
+		}
+
+		int fileIndex = 0;
+		for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile()) {
+				Future future = executor.submit(new StreamProcess(env,configs,fileIndex));
+				future.get();
+				fileIndex++;
+			}
+		}
+
+		env.execute();
 		executor.shutdown();
+
 	}
 
 }

@@ -10,8 +10,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 public interface WindowProcessInterface {
 
     String processData();
-    void preProcessData(Instance i);
+    void preProcessData(Instance inst);
     void setConfig(XMLConfiguration _config);
-    void setDocumentsSVD(DocumentsSVD doc);
 
 }

@@ -1,8 +1,7 @@
 package Streamprocess.WindowProcess;
 
-import Algorithm.DBSCAN;
-import Model.Instances.Instance;
 import Model.Instances.GenericInstance;
+import Model.Instances.Instance;
 import Preprocess.DocumentsSVD;
 import Preprocess.JSONPathTraverse;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -15,19 +14,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by wilhelmus on 15/06/17.
+ * Created by wilhelmus on 20/06/17.
  */
-public class WindowClusteringProcess implements WindowProcessInterface{
+public class WindowClassificationTextProcess implements WindowProcessInterface {
 
     private XMLConfiguration config;
     private ArrayList<GenericInstance> instances;
     private DocumentsSVD documentsSVD;
 
-    public WindowClusteringProcess(){
+    public WindowClassificationTextProcess(){
         instances = new ArrayList<>();
     }
 
-    public WindowClusteringProcess(XMLConfiguration _config, DocumentsSVD _doc){
+    public WindowClassificationTextProcess(XMLConfiguration _config, DocumentsSVD _doc){
         documentsSVD = _doc;
         config = _config;
         instances = new ArrayList<>();
@@ -36,12 +35,10 @@ public class WindowClusteringProcess implements WindowProcessInterface{
     @Override
     public String processData() {
         String ret = null;
-        if(instances.size()>1) {
+        if(instances.size()>0) {
             ObjectMapper jsonParser = new ObjectMapper();
-            DBSCAN dbscanner = new DBSCAN(instances, config.getDouble("dataMining.maxDistance"), config.getInt("dataMining.minClusters"));
-            dbscanner.performCluster();
             try {
-                ret = jsonParser.writeValueAsString(dbscanner.getClusters());
+                ret = jsonParser.writeValueAsString(instances);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -61,6 +58,11 @@ public class WindowClusteringProcess implements WindowProcessInterface{
                     case "text": {
                         if (documentsSVD.doesHasModel()) {
                             testInstance.addToNumericAttributes(documentsSVD.search(temp.getTextValue(), h.getString("svdFunction")), h.getDouble("weight"));
+                            try {
+                                testInstance.addNewData("class",documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction")));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                         break;
                     }

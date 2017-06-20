@@ -1,34 +1,32 @@
 package Model.Clustering;
 
-import Model.Instances.TestClusteringInstance;
-import org.codehaus.jackson.map.ObjectMapper;
+import Model.Instances.GenericInstance;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * Created by wilhelmus on 27/05/17.
  */
 public class Cluster {
-    private ArrayList<TestClusteringInstance> elements;
+    private ArrayList<GenericInstance> elements;
     private String label;
     public Cluster(){
         elements = new ArrayList<>();
         label = "noise";
     }
 
-    public Cluster(ArrayList<TestClusteringInstance> instances){
+    public Cluster(ArrayList<GenericInstance> instances){
         elements = instances;
     }
 
-    public ArrayList<TestClusteringInstance> getElements(){
+    public ArrayList<GenericInstance> getElements(){
         return elements;
     }
-    public void setElements(ArrayList<TestClusteringInstance> instances){
+    public void setElements(ArrayList<GenericInstance> instances){
         elements = instances;
     }
 
-    public void addInstance(TestClusteringInstance inst){
+    public void addInstance(GenericInstance inst){
         elements.add(inst);
     }
 

@@ -11,17 +11,20 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by wilhelmus on 17/05/17.
  */
 public class StreamParser implements FlatMapFunction<String, Instance> {
 
-    private static transient XMLConfiguration config;
+    private static transient ArrayList<XMLConfiguration> configs;
     private transient ObjectMapper jsonParser;
+    private int configIndex;
 
-    public StreamParser(XMLConfiguration _config) throws ConfigurationException {
-        config = _config;
+    public StreamParser(ArrayList<XMLConfiguration> _configs, int index) throws ConfigurationException {
+        configs = _configs;
+        configIndex = index;
     }
 
     @Override
@@ -30,12 +33,15 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
             jsonParser = new ObjectMapper();
         }
 
-        switch(config.getString("data.type")){
-            case "tweet":{
+        switch(configs.get(configIndex).getString("data.type")){
+            case "json":{
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-                StreamFilter streamFilter = new StreamFilter(config);
+                StreamFilter streamFilter = new StreamFilter(configs.get(configIndex));
                 if(streamFilter.filter(value)){
-                    out.collect(new Instance(jsonNode.get(config.getString("data.id")).toString(),jsonNode));
+                    if(jsonNode!=null) {
+                        Instance inst = new Instance(jsonNode.get(configs.get(configIndex).getString("data.id")).toString(), jsonNode);
+                        out.collect(inst);
+                    }
                 }
                 break;
             }

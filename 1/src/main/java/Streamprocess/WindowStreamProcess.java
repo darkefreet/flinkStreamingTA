@@ -9,6 +9,7 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 
 /**
@@ -17,18 +18,20 @@ import java.lang.reflect.Constructor;
 public class WindowStreamProcess implements WindowFunction<Instance, String, String, TimeWindow> {
 
     private static transient DocumentsSVD documentsSVD;
-    private static transient XMLConfiguration config;
+    private static transient ArrayList<XMLConfiguration> configs;
+    private int configIndex;
 
-    public WindowStreamProcess(DocumentsSVD _doc, XMLConfiguration _config) throws ConfigurationException {
-        config = _config;
+    public WindowStreamProcess(DocumentsSVD _doc, ArrayList<XMLConfiguration> _configs,int index) throws ConfigurationException {
+        configs = _configs;
         documentsSVD = _doc;
+        configIndex = index;
     }
 
     @Override
     public void apply(String s, TimeWindow timeWindow, Iterable<Instance> iterable, Collector<String> collector) throws Exception {
-        Class cl = Class.forName(config.getString("dataMining.processingClass"));
+        Class cl = Class.forName(configs.get(configIndex).getString("dataMining.processingClass"));
         Constructor con = cl.getConstructor(XMLConfiguration.class,DocumentsSVD.class);
-        Object obj = con.newInstance(config,documentsSVD);
+        Object obj = con.newInstance(configs.get(configIndex),documentsSVD);
 
         for (Instance instance : iterable) {
             obj.getClass().getDeclaredMethod("preProcessData",instance.getClass()).invoke(obj,instance);

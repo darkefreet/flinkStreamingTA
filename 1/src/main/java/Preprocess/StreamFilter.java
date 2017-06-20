@@ -32,23 +32,29 @@ public class StreamFilter {
         boolean ret = true;
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
         for (HierarchicalConfiguration h : hconfig){
-            JsonNode temp = null;
+            JsonNode temp;
             if(h.getString("attribute").contains(".")){
                 String attribute = h.getString("attribute");
                 String[] attributes = attribute.split("\\.");
                 temp = jsonNode.get(attributes[0]);
-                if(temp.equals(null)) break;
+                if(temp==null){
+                    ret = false;
+                    break;
+                }
                 if(attributes.length > 1){
                     for(int i = 1; i < attributes.length; i++){
                         temp = temp.get(attributes[i]);
-                        if(temp.equals(null)) break;
+                        if(temp==null) {
+                            ret = false;
+                            break;
+                        }
                     }
                 }
             }
             else{
                 temp = jsonNode.get(h.getString("attribute"));
             }
-            if(temp.equals(null)) {
+            if(temp==null) {
                 ret = false;
                 break;
             }else{
@@ -71,7 +77,6 @@ public class StreamFilter {
             }
         }
 
-        boolean hasText = jsonNode.has("created_at") && jsonNode.has("text");
-        return ret && hasText;
+        return ret;
     }
 }

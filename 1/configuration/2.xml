@@ -16,33 +16,28 @@
     <!--</source>-->
 
     <textProcess><!--FOR LSD Calculation purposes-->
-        <anyText>true</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
+        <anyText>false</anyText><!-- true : any text want to be analyzed, false : if there is no text to be analyzed-->
         <dataPath>resource/news/</dataPath><!-- path for documents to make SVD Model-->
-        <label>kategori</label><!-- JSON label for the LSD document category-->
-        <resource>isi</resource><!-- JSON label for the LSD document resource to build the model -->
-        <function>cosine</function><!-- To calculate singular value decomposition. options: "cosine" | "dot" -->
+        <label></label><!-- JSON label for the LSD document category-->
+        <resource></resource><!-- JSON label for the LSD document resource to build the model -->
+        <function></function><!-- To calculate singular value decomposition. options: "cosine" | "dot" -->
     </textProcess>
 
     <!--DATA TYPE AND FILTERS-->
     <data>
-        <type>tweet</type>
-        <id>id</id>
+        <type>json</type>
+        <id>op</id>
         <filtersConfiguration>
             <filter>
-                <dataType>string</dataType>
-                <attribute>lang</attribute>
-                <value>in</value>
-            </filter>
-            <filter>
                 <dataType>integer</dataType>
-                <attribute>user.friends_count</attribute>
-                <value>5</value>
+                <attribute>x.size</attribute>
+                <value>10</value>
                 <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
             <filter>
                 <dataType>count</dataType>
-                <attribute>entities.hashtags</attribute>
-                <value>0</value>
+                <attribute>x.inputs</attribute>
+                <value>1</value>
                 <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
         </filtersConfiguration>
@@ -51,7 +46,7 @@
     <!--KEY FOR STREAM DATA-->
     <keyBy>
         <type>static</type>
-        <value>1</value>
+        <value>2</value>
     </keyBy>
     <!--<keyBy>-->
         <!--<type>object</type>-->
@@ -63,41 +58,35 @@
         <processingClass>Streamprocess.WindowProcess.WindowClusteringProcess</processingClass>
         <type>clustering</type>
         <algorithm>dbscan</algorithm>
-        <maxDistance>2500.0</maxDistance>
+        <maxDistance>200.0</maxDistance>
         <minClusters>3</minClusters>
         <distance>euclidean</distance>
         <attributes>
             <attribute>
-                <path>text</path>
-                <type>text</type><!--options : "text" | "numeric" -->
-                <weight>1000.0</weight><!--for standardized attribute weight-->
+                <path>x.size</path>
+                <type>numeric</type><!--options : "text" | "numeric" -->
+                <weight>1.0</weight><!--for standardized attribute weight-->
                 <svdFunction>cosine</svdFunction>
-            </attribute>
-            <attribute>
-                <path>user.followers_count</path>
-                <type>numeric</type>
-                <weight>1.0</weight>
             </attribute>
         </attributes>
         <resultsData>
-            <path>text</path>
-            <path>user.followers_count</path>
+            <path>*</path>
         </resultsData>
     </dataMining>
 
     <!--WINDOW CONFIGURATION-->
     <window>
-        <type>tumbling</type><!--options: tumbling / sliding / session -->
+        <type>sliding</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>
-            <minutes>1</minutes>
-            <seconds>0</seconds>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
         </size>
         <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
             <hours>0</hours>
             <minutes>0</minutes>
-            <seconds>30</seconds>
+            <seconds>15</seconds>
         </overlap>
     </window>
 
