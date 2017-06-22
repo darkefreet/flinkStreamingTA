@@ -176,10 +176,8 @@ public class DocumentsSVD {
         if(hasModel) {
             NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
             String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
-
             double[] queryVector = new double[NUM_FACTORS];
             Arrays.fill(queryVector, 0.0);
-
             for (String term : queryTerms) {
                 addTermVector(term, queryVector);
             }

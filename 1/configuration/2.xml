@@ -32,14 +32,20 @@
                 <dataType>integer</dataType>
                 <attribute>x.size</attribute>
                 <value>10</value>
-                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
             <filter>
                 <dataType>count</dataType>
                 <attribute>x.inputs</attribute>
                 <value>1</value>
-                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
+            <!--<filter>-->
+                <!--<dataType>total</dataType>-->
+                <!--<attribute>x.inputs.prev_out.value</attribute>-->
+                <!--<value>2500</value>-->
+                <!--<comparison>></comparison>-->
+            <!--</filter>-->
         </filtersConfiguration>
     </data>
 

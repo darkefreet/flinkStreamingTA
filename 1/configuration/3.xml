@@ -37,13 +37,13 @@
                 <dataType>integer</dataType>
                 <attribute>user.friends_count</attribute>
                 <value>5</value>
-                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
             <filter>
                 <dataType>count</dataType>
                 <attribute>entities.hashtags</attribute>
                 <value>0</value>
-                <comparison>">="</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
             </filter>
         </filtersConfiguration>
     </data>

@@ -1,6 +1,7 @@
 package Streamprocess;
 
 import Model.Instances.Instance;
+import Preprocess.JSONPathTraverse;
 import Preprocess.StreamFilter;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -19,12 +20,14 @@ import java.util.ArrayList;
 public class StreamParser implements FlatMapFunction<String, Instance> {
 
     private static transient ArrayList<XMLConfiguration> configs;
-    private transient ObjectMapper jsonParser;
+    private static transient ObjectMapper jsonParser;
     private int configIndex;
+    private static transient JSONPathTraverse pathTraverse;
 
     public StreamParser(ArrayList<XMLConfiguration> _configs, int index) throws ConfigurationException {
         configs = _configs;
         configIndex = index;
+        pathTraverse = new JSONPathTraverse();
     }
 
     @Override
@@ -38,8 +41,10 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
                 StreamFilter streamFilter = new StreamFilter(configs.get(configIndex));
                 if(streamFilter.filter(value)){
-                    if(jsonNode!=null) {
-                        Instance inst = new Instance(jsonNode.get(configs.get(configIndex).getString("data.id")).toString(), jsonNode);
+                    if(!jsonNode.isNull()) {
+                        String path = configs.get(configIndex).getString("data.id");
+                        JsonNode temp = pathTraverse.solve(path,jsonNode);
+                        Instance inst = new Instance(jsonNode.get(path).toString(),jsonNode);
                         out.collect(inst);
                     }
                 }

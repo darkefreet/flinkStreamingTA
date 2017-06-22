@@ -1,7 +1,5 @@
 package Test;
 
-import Preprocess.DocumentsSVD;
-
 import java.io.IOException;
 
 /**
@@ -9,8 +7,13 @@ import java.io.IOException;
  */
 public class testClass {
     public static void main(String[] args) throws IOException {
-        DocumentsSVD d = new DocumentsSVD();
-        d.makeSVDModel("resource/news","kategori","isi");
-        System.out.println(d.search("bulutangkis","cosine"));
+//        DocumentsSVD d = new DocumentsSVD();
+//        d.makeSVDModel("resource/news","kategori","isi");
+//        System.out.println(d.search("bulutangkis","cosine"));
+
+        String a = "test.babi.cacing";
+        String s = a.substring(0,a.indexOf("."));
+        String b = a.substring(a.indexOf(".")+1);
+        System.out.println(b);
     }
 }

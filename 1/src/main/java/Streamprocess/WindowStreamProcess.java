@@ -32,7 +32,6 @@ public class WindowStreamProcess implements WindowFunction<Instance, String, Str
         Class cl = Class.forName(configs.get(configIndex).getString("dataMining.processingClass"));
         Constructor con = cl.getConstructor(XMLConfiguration.class,DocumentsSVD.class);
         Object obj = con.newInstance(configs.get(configIndex),documentsSVD);
-
         for (Instance instance : iterable) {
             obj.getClass().getDeclaredMethod("preProcessData",instance.getClass()).invoke(obj,instance);
         }
