@@ -25,6 +25,7 @@ public class CollectTweet {
         TwitterSource twitterSource = new TwitterSource("twitter.properties");
         // get input data
         source = env.addSource(twitterSource);
+//        source = env.socketTextStream("localhost",4542,"\n", 0);
 
         DataStream<String> streamOutput =
                 source.flatMap(new FlatMapFunction<String, String>() {
@@ -35,13 +36,16 @@ public class CollectTweet {
                         }
                         JsonNode jsonNode = jsonParser.readValue(s,JsonNode.class);
                         if(jsonNode.has("lang")){
-                            if(jsonNode.get("lang").getTextValue().equals("in"))
-                                collector.collect(s);
+                            if(jsonNode.get("lang").getTextValue().equals("in")) {
+                                String text = jsonNode.get("text").getTextValue().replaceAll("\\n"," ");
+                                collector.collect(text);
+                            }
+//                            collector.collect(s);
                         }
                     }
                 });
 
-//        streamOutput.writeAsText("twitter-indo.txt").setParallelism(1);
+        streamOutput.writeAsText("all-text.txt").setParallelism(1);
 
         streamOutput.print();
         env.execute();

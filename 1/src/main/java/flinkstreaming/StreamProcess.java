@@ -59,7 +59,6 @@ public class StreamProcess implements Callable {
 
     @Override
     public Object call() throws Exception {
-
         switch(configs.get(configIndex).getString("source.name")){
             case "twitter":{
                 //set Twitter properties to authenticate
@@ -89,7 +88,6 @@ public class StreamProcess implements Callable {
             }
         }
 
-
         //test
         DataStream<Instance> streamOutput =
                 source.flatMap(new StreamParser(configs,configIndex)).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
@@ -99,34 +97,24 @@ public class StreamProcess implements Callable {
                     }
                 });
 
-
-
-//        streamOutput.print();
-
         DataStream<String> windowedStream;
         Long windowTime = 0L;
         Long overlapTime = 0L;
         windowTime = windowTime + (configs.get(configIndex).getInt("window.size.hours")*3600) + (configs.get(configIndex).getInt("window.size.minutes")*60) + (configs.get(configIndex).getInt("window.size.seconds"));
         overlapTime = overlapTime + (configs.get(configIndex).getInt("window.overlap.hours")*3600) + (configs.get(configIndex).getInt("window.overlap.minutes")*60) + (configs.get(configIndex).getInt("window.overlap.seconds"));
-
-        DocumentsSVD docSVD = new DocumentsSVD();
-        if(configs.get(configIndex).getString("textProcess.anyText").equals("true")){
-            docSVD.makeSVDModel(configs.get(configIndex).getString("textProcess.dataPath"),configs.get(configIndex).getString("textProcess.label"),configs.get(configIndex).getString("textProcess.resource"));
-        }
-
         switch(configs.get(configIndex).getString("window.type")){
             case "tumbling": {
                 switch (configs.get(configIndex).getString("window.time")) {
                     case "event": {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(TumblingEventTimeWindows.of(Time.seconds(windowTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                     default: {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(TumblingProcessingTimeWindows.of(Time.seconds(windowTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                 }
@@ -137,13 +125,13 @@ public class StreamProcess implements Callable {
                     case "event": {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(SlidingEventTimeWindows.of(Time.seconds(windowTime), Time.seconds(overlapTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                     default: {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(SlidingProcessingTimeWindows.of(Time.seconds(windowTime), Time.seconds(overlapTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                 }
@@ -154,13 +142,13 @@ public class StreamProcess implements Callable {
                     case "event": {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(EventTimeSessionWindows.withGap(Time.seconds(windowTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                     default: {
                         windowedStream = streamOutput.keyBy(keySelect)
                                 .window(ProcessingTimeSessionWindows.withGap(Time.seconds(windowTime)))
-                                .apply(new WindowStreamProcess(docSVD,configs,configIndex));
+                                .apply(new WindowStreamProcess(configs,configIndex));
                         break;
                     }
                 }
@@ -168,7 +156,7 @@ public class StreamProcess implements Callable {
             }
         }
 
-        windowedStream.print();
+//        windowedStream.print();
 
         switch(configs.get(configIndex).getString("windowSink.type")){
             case "text": {

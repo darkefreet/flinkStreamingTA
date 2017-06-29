@@ -3,24 +3,27 @@ package Preprocess;
 import Model.DocumentModelling.ClassifyDocumentsResult;
 import Model.DocumentModelling.Document;
 import com.aliasi.matrix.SvdMatrix;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 
 /**
  * Created by wilhelmus on 07/06/17.
  */
-public class DocumentsSVD {
+public class DocumentsSVD implements Serializable{
 
     private double termDocumentMatrix[][];
     private ArrayList<Document> documents;
     private Set<String> setOfTerms;
+    private Set<String> labels;
     private String[] terms;
-    private SvdMatrix svdMatrix;
+    private transient SvdMatrix svdMatrix;
     private int maxFactors;
     private double featureInit;
     private double initialLearningRate;
@@ -52,6 +55,7 @@ public class DocumentsSVD {
         docVectors = null;
         documents = new ArrayList<>();
         setOfTerms = new HashSet<>();
+        labels = new HashSet<>();
         hasModel = false;
     }
 
@@ -75,6 +79,7 @@ public class DocumentsSVD {
                 NormalizeSentence normalize = new NormalizeSentence(res);
                 doc.setResource(normalize.getSentence());
                 doc.countWords();
+                labels.add(json.get(label).getTextValue());
                 documents.add(doc);
             }
         }
@@ -147,15 +152,19 @@ public class DocumentsSVD {
         if(hasModel) {
             NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
             String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
-
             double[] queryVector = new double[NUM_FACTORS];
             Arrays.fill(queryVector, 0.0);
-
             for (String term : queryTerms) {
                 addTermVector(term, queryVector);
             }
             ObjectMapper objectMapper = new ObjectMapper();
             List<String> a = new ArrayList<>();
+            Map<String, Tuple2<Double,Integer>> totals = new HashMap<>();
+            for(String label : labels){
+                Tuple2<Double,Integer> tup = new Tuple2<>();
+                tup.setField(0.0,0);tup.setField(0,1);
+                totals.put(label,tup);
+            }
             for (int j = 0; j < docVectors.length; ++j) {
                 double score;
                 if(function.equals("dot")) {
@@ -163,10 +172,66 @@ public class DocumentsSVD {
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
                 }
-                ClassifyDocumentsResult c = new ClassifyDocumentsResult(score,documents.get(j).getLabel());
-                a.add(objectMapper.writeValueAsString(c));
+                String label = documents.get(j).getLabel();
+                if(!Double.isNaN(score)) {
+                    if(score > totals.get(label).f0){
+                        totals.get(label).setField(score, 0);
+                    }
+                }
             }
-            ret = objectMapper.writeValueAsString(a);
+
+            for(String k : totals.keySet()){
+                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0, k);
+                a.add(objectMapper.writeValueAsString(c));
+                ret = objectMapper.writeValueAsString(a);
+            }
+
+        }
+        return ret;
+    }
+
+    public String classify(String arg, String function,String target) throws IOException {
+        String ret = "";
+        if(hasModel) {
+            NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
+            String[] queryTerms = normalize.getSentence().split(" |,"); // space or comma separated
+            double[] queryVector = new double[NUM_FACTORS];
+            Arrays.fill(queryVector, 0.0);
+            for (String term : queryTerms) {
+                addTermVector(term, queryVector);
+            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> a = new ArrayList<>();
+            Map<String, Tuple2<Double,Integer>> totals = new HashMap<>();
+            for(String label : labels){
+                Tuple2<Double,Integer> tup = new Tuple2<>();
+                tup.setField(0.0,0);tup.setField(0,1);
+                totals.put(label,tup);
+            }
+            for (int j = 0; j < docVectors.length; ++j) {
+                double score;
+                if(function.equals("dot")) {
+                    score = dotProduct(queryVector, docVectors[j], scales);
+                }else {
+                    score = cosine(queryVector, docVectors[j], scales);
+                }
+                String label = documents.get(j).getLabel();
+                if(!Double.isNaN(score)) {
+                    if(score > totals.get(label).f0){
+                        totals.get(label).setField(score, 0);
+                    }
+                }
+            }
+
+            double score = totals.get(target).f0;
+            for(String k : totals.keySet()){
+                if(!k.equals(target)){
+                    score -= totals.get(k).f0;
+                }
+
+            }
+            ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0, target);
+            ret = objectMapper.writeValueAsString(c);
         }
         return ret;
     }
@@ -181,8 +246,6 @@ public class DocumentsSVD {
             for (String term : queryTerms) {
                 addTermVector(term, queryVector);
             }
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<String> a = new ArrayList<>();
             for (int j = 0; j < docVectors.length; ++j) {
                 double score;
                 if(function.equals("dot")) {

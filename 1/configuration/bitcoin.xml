@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <!--PICK ONE SOURCE-->
+    <!--<source>-->
+        <!--<name>twitter</name>-->
+        <!--<properties-file>twitter.properties</properties-file>-->
+    <!--</source>-->
+    <source>
+        <name>bitcoin</name>
+        <properties-file>bitcoin.properties</properties-file>
+    </source>
+    <!--<source>-->
+        <!--<name>socket</name>-->
+        <!--<ip>localhost</ip>-->
+        <!--<port>4542</port>-->
+    <!--</source>-->
+
+    <!--DATA TYPE, FILTERS AND PARTITIONS-->
+    <data>
+        <type>json</type>
+        <id>tx_index</id>
+        <filtersConfiguration>
+            <filter>
+                <dataType>integer</dataType>
+                <attribute>x.size</attribute>
+                <value>100</value>
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+            </filter>
+            <filter>
+                <dataType>count</dataType>
+                <attribute>x.out</attribute>
+                <value>1</value>
+                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
+            </filter>
+            <!--<filter>-->
+                <!--<dataType>total</dataType>-->
+                <!--<attribute>x.inputs.prev_out.value</attribute>-->
+                <!--<value>2500</value>-->
+                <!--<comparison>></comparison>-->
+            <!--</filter>-->
+        </filtersConfiguration>
+        <partitionConfiguration>
+            <anyPartition>true</anyPartition>
+            <path>x.out</path><!-- accepting array only-->
+        </partitionConfiguration>
+    </data>
+
+    <!--KEY FOR STREAM DATA-->
+    <keyBy>
+        <type>static</type>
+        <value>2</value>
+    </keyBy>
+    <!--<keyBy>-->
+        <!--<type>object</type>-->
+        <!--<function>getId</function>-->
+    <!--</keyBy>-->
+
+    <!--DATA MINING CONFIGURATION-->
+    <dataMining>
+        <processingClass>Streamprocess.WindowProcess.WindowDBSCANProcess</processingClass>
+        <type>clustering</type>
+        <algorithm>dbscan</algorithm>
+        <maxDistance>100.0</maxDistance>
+        <minClusters>3</minClusters>
+        <distance>euclidean</distance>
+        <attributes>
+            <attribute>
+                <path>value</path>
+                <type>numeric</type><!--options : "text" | "numeric" -->
+                <weight>1.0</weight><!--for standardized attribute weight-->
+                <!--<svdFunction>cosine</svdFunction>-->
+            </attribute>
+        </attributes>
+        <resultsData>
+            <path>*</path>
+        </resultsData>
+    </dataMining>
+
+    <!--WINDOW CONFIGURATION-->
+    <window>
+        <type>sliding</type><!--options: tumbling / sliding / session -->
+        <time>process</time><!--options: event / process-->
+        <size>
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
+        </size>
+        <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>15</seconds>
+        </overlap>
+    </window>
+
+    <!--SINK CONFIGURATION-->
+    <!--<windowSink>-->
+        <!--<type>kafka</type>-->
+        <!--<topic>bitcoin</topic>-->
+        <!--<ipPort>localhost:9092</ipPort>-->
+    <!--</windowSink>-->
+    <windowSink>
+    <type>print</type>
+    </windowSink>
+    <!--<windowSink>-->
+    <!--<type>csv</type>-->
+    <!--<path>csvOutput</path>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+    <!--<type>text</type>-->
+    <!--<path>textOutput</path>-->
+    <!--</windowSink>-->
+    <!--<windowSink>-->
+    <!--<type>socket</type>-->
+    <!--<ip>localhost</ip>-->
+    <!--<port>4543</port>-->
+    <!--</windowSink>-->
+
+</configuration>

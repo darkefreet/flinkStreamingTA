@@ -1,11 +1,12 @@
 package Model.DocumentModelling;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * Created by wilhelmus on 10/06/17.
  */
-public class Document {
+public class Document implements Serializable{
     private String label;
     private HashMap<String, Integer> wordCounts;
     private String resource;

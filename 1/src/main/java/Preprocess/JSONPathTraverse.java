@@ -23,7 +23,6 @@ public class JSONPathTraverse {
         if (path.charAt(path.length() - 1) == '.') {
             path = path.substring(0, path.length() - 1);
         }
-
         if (path.contains(".")) {
             String[] attributes = path.split("\\.");
             temp = jsonNode.get(attributes[0]);

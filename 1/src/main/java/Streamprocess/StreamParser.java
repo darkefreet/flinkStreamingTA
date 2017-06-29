@@ -4,6 +4,7 @@ import Model.Instances.Instance;
 import Preprocess.JSONPathTraverse;
 import Preprocess.StreamFilter;
 
+import Preprocess.StreamPartition;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -41,11 +42,21 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
                 StreamFilter streamFilter = new StreamFilter(configs.get(configIndex));
                 if(streamFilter.filter(value)){
-                    if(!jsonNode.isNull()) {
-                        String path = configs.get(configIndex).getString("data.id");
-                        JsonNode temp = pathTraverse.solve(path,jsonNode);
-                        Instance inst = new Instance(jsonNode.get(path).toString(),jsonNode);
-                        out.collect(inst);
+                    if(jsonNode!=null) {
+                        if(configs.get(configIndex).getString("data.partitionConfiguration.anyPartition").equals("true")){
+                            StreamPartition part= new StreamPartition(configs.get(configIndex));
+                            for(JsonNode j: part.partition(value)){
+                                String path = configs.get(configIndex).getString("data.id");
+                                Instance inst = new Instance(pathTraverse.solve(path,j).getTextValue(),j);
+                                out.collect(inst);
+                            }
+                        }else {
+                            String path = configs.get(configIndex).getString("data.id");
+                            if(jsonNode!=null && path!=null) {
+                                Instance inst = new Instance(null, jsonNode);
+                                out.collect(inst);
+                            }
+                        }
                     }
                 }
                 break;

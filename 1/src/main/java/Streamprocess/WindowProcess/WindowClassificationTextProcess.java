@@ -9,7 +9,10 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +23,23 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
 
     private XMLConfiguration config;
     private ArrayList<GenericInstance> instances;
-    private DocumentsSVD documentsSVD;
+    private static DocumentsSVD documentsSVD;
 
-    public WindowClassificationTextProcess(){
+    public WindowClassificationTextProcess() throws IOException, ClassNotFoundException {
+        if(documentsSVD==null) {
+            FileInputStream myFileInputStream = new FileInputStream("resource/svdDocuments");
+            ObjectInputStream myObjectInputStream = new ObjectInputStream(myFileInputStream);
+            documentsSVD = (DocumentsSVD) myObjectInputStream.readObject();
+        }
         instances = new ArrayList<>();
     }
 
-    public WindowClassificationTextProcess(XMLConfiguration _config, DocumentsSVD _doc){
-        documentsSVD = _doc;
+    public WindowClassificationTextProcess(XMLConfiguration _config) throws IOException, ClassNotFoundException{
+        if(documentsSVD==null) {
+            FileInputStream myFileInputStream = new FileInputStream("resource/svdDocuments");
+            ObjectInputStream myObjectInputStream = new ObjectInputStream(myFileInputStream);
+            documentsSVD = (DocumentsSVD) myObjectInputStream.readObject();
+        }
         config = _config;
         instances = new ArrayList<>();
     }
@@ -53,13 +65,12 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
         JSONPathTraverse jsonPath = new JSONPathTraverse();
         for (HierarchicalConfiguration h : hconfig) {
             JsonNode temp = jsonPath.solve(h.getString("path"),inst.getJson());
-            if(!temp.equals(null)) {
+            if(temp!=null) {
                 switch (h.getString("type")) {
                     case "text": {
                         if (documentsSVD.doesHasModel()) {
-                            testInstance.addToNumericAttributes(documentsSVD.search(temp.getTextValue(), h.getString("svdFunction")), h.getDouble("weight"));
                             try {
-                                testInstance.addNewData("class",documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction")));
+                                testInstance.addNewData("class",documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction"),"promo").replaceAll("\\\\",""));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

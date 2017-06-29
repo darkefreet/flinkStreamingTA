@@ -17,21 +17,19 @@ import java.util.ArrayList;
  */
 public class WindowStreamProcess implements WindowFunction<Instance, String, String, TimeWindow> {
 
-    private static transient DocumentsSVD documentsSVD;
     private static transient ArrayList<XMLConfiguration> configs;
     private int configIndex;
 
-    public WindowStreamProcess(DocumentsSVD _doc, ArrayList<XMLConfiguration> _configs,int index) throws ConfigurationException {
+    public WindowStreamProcess( ArrayList<XMLConfiguration> _configs,int index) throws ConfigurationException {
         configs = _configs;
-        documentsSVD = _doc;
         configIndex = index;
     }
 
     @Override
     public void apply(String s, TimeWindow timeWindow, Iterable<Instance> iterable, Collector<String> collector) throws Exception {
         Class cl = Class.forName(configs.get(configIndex).getString("dataMining.processingClass"));
-        Constructor con = cl.getConstructor(XMLConfiguration.class,DocumentsSVD.class);
-        Object obj = con.newInstance(configs.get(configIndex),documentsSVD);
+        Constructor con = cl.getConstructor(XMLConfiguration.class);
+        Object obj = con.newInstance(configs.get(configIndex));
         for (Instance instance : iterable) {
             obj.getClass().getDeclaredMethod("preProcessData",instance.getClass()).invoke(obj,instance);
         }

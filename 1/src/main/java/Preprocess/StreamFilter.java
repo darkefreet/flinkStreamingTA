@@ -37,45 +37,36 @@ public class StreamFilter {
         boolean ret = true;
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
         for (HierarchicalConfiguration h : hconfig){
-            switch(h.getString("dataType")){
-                case "string":{
-                    JsonNode temp = jsonTraverse.solve(h.getString("attribute"),jsonNode);
-                    if(temp!=null) {
+            JsonNode temp = jsonTraverse.solve(h.getString("attribute"),jsonNode);
+            if(temp==null){
+                ret = false;
+                break;
+            }
+            else {
+                switch (h.getString("dataType")) {
+                    case "string": {
                         if (!temp.getTextValue().equals(h.getString("value")))
                             ret = false;
-                    }else{
-                        ret = false;
+                        break;
                     }
-                    break;
-                }
-                case "count":{
-                    JsonNode temp = jsonTraverse.solve(h.getString("attribute"),jsonNode);
-                    if(temp!=null){
-                        if(temp.isArray())
-                            ret = sqlFilter.compareNumber(temp.size(),h.getDouble("value"),h.getString("comparison"));
+                    case "integer" :{
+                        if(!sqlFilter.compareNumber(temp.getDoubleValue(),h.getDouble("value"),h.getString("comparison")))
+                            ret = false;
+                        break;
+                    }
+                    case "count":{
+                        if(temp.isArray()) {
+                            if (!sqlFilter.compareNumber(temp.size(), h.getDouble("value"), h.getString("comparison")))
+                                ret = false;
+                        }
                         else{
                             ret = false;
                         }
-                    }else ret = false;
                     break;
-                }
-                case "total":{
-                    double tot = jsonTraverse.total(h.getString("attribute"),jsonNode);
-                        ret = sqlFilter.compareNumber(tot,h.getDouble("value"),h.getString("comparison"));
-                    break;
-                }
-                default:{ //integer
-                    JsonNode temp = jsonTraverse.solve(h.getString("attribute"),jsonNode);
-                    if(temp!=null)
-                        ret = sqlFilter.compareNumber(temp.getTextValue(),h.getString("value"),h.getString("comparison"));
-                    else{
-                        ret = false;
                     }
-                    break;
                 }
             }
         }
-
         return ret;
     }
 }
