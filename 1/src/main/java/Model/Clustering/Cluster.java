@@ -1,6 +1,7 @@
 package Model.Clustering;
 
 import Model.Instances.GenericInstance;
+import Model.Instances.Instance;
 
 import java.util.ArrayList;
 
@@ -8,25 +9,25 @@ import java.util.ArrayList;
  * Created by wilhelmus on 27/05/17.
  */
 public class Cluster {
-    private ArrayList<GenericInstance> elements;
+    private ArrayList<Instance> elements;
     private String label;
     public Cluster(){
         elements = new ArrayList<>();
         label = "noise";
     }
 
-    public Cluster(ArrayList<GenericInstance> instances){
+    public Cluster(ArrayList<Instance> instances){
         elements = instances;
     }
 
-    public ArrayList<GenericInstance> getElements(){
+    public ArrayList<Instance> getElements(){
         return elements;
     }
-    public void setElements(ArrayList<GenericInstance> instances){
+    public void setElements(ArrayList<Instance> instances){
         elements = instances;
     }
 
-    public void addInstance(GenericInstance inst){
+    public void addInstance(Instance inst){
         elements.add(inst);
     }
 

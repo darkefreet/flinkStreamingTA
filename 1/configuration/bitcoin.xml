@@ -60,14 +60,14 @@
         <processingClass>Streamprocess.WindowProcess.WindowDBSCANProcess</processingClass>
         <type>clustering</type>
         <algorithm>dbscan</algorithm>
-        <maxDistance>100.0</maxDistance>
+        <maxDistance>20000.0</maxDistance>
         <minClusters>3</minClusters>
         <distance>euclidean</distance>
         <attributes>
             <attribute>
                 <path>value</path>
                 <type>numeric</type><!--options : "text" | "numeric" -->
-                <weight>1.0</weight><!--for standardized attribute weight-->
+                <weight>0.0005</weight><!--for standardized attribute weight-->
                 <!--<svdFunction>cosine</svdFunction>-->
             </attribute>
         </attributes>

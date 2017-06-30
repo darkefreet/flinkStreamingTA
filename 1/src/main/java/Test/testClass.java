@@ -1,10 +1,14 @@
 package Test;
 
+import Algorithm.DBSCAN;
+import Model.Instances.GenericInstance;
+import Model.Instances.Instance;
 import Preprocess.JSONPathTraverse;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by wilhelmus on 10/06/17.
@@ -26,10 +30,23 @@ public class testClass {
 //        JSONPathTraverse pathSolver = new JSONPathTraverse();
 //        System.out.println(pathSolver.solve("op",a));
 
-        //#test 3
-        String a = "http://abc.com adalah sebuah website dengan nomor telepon 08129301822 senin selasa senin 21 May 2017";
-        System.out.println(a.replaceAll("^(http|https).[\\S]*","{{url}}"));
-        System.out.println(a.replaceAll("senin","{{phone}}").replaceAll("selasa","{{phone}}"));
+//        //#test 3
+//        String a = "http://abc.com adalah sebuah website dengan nomor telepon 08129301822 senin selasa senin 21 May 2017";
+//        System.out.println(a.replaceAll("^(http|https).[\\S]*","{{url}}"));
+//        System.out.println(a.replaceAll("senin","{{phone}}").replaceAll("selasa","{{phone}}"));
 
+        //test 4
+        Instance a = new Instance();
+        GenericInstance b = new GenericInstance();
+        a.addToNumericAttributes(15.0,1.0);
+        b.addToNumericAttributes(59.395,1.0);
+        Instance c = new Instance();
+        c.addToNumericAttributes(1000000.0,1.0);
+        ArrayList<Instance> arrInst = new ArrayList<>();
+        arrInst.add(a);arrInst.add(b);arrInst.add(c);
+        DBSCAN dbscanner = new DBSCAN(arrInst,5000,2);
+        dbscanner.performCluster();
+        ObjectMapper jsonParser = new ObjectMapper();
+        System.out.println(jsonParser.writeValueAsString(dbscanner.getClusters()));
     }
 }

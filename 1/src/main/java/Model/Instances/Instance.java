@@ -60,7 +60,7 @@ public class Instance {
         this.numericAttributes.add(new Double(_score * weight));
     }
 
-    public double euclideanDistance(GenericInstance inst){
+    public double euclideanDistance(Instance inst){
         double ret = -1.0;
         //check if the dimension is comparable
         if(numericAttributes.size()==inst.getNumericAttributes().size()){

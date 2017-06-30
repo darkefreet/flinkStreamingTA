@@ -41,6 +41,10 @@ public class GenericInstance extends Instance {
         }
     }
 
+    public void addJson(String path, JsonNode j){
+        ((ObjectNode) data).put(path,j);
+    }
+
     public void addNewData(String path, String value){
         ((ObjectNode)data).put(path,value);
     }

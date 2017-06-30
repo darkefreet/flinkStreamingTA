@@ -20,7 +20,7 @@ import java.util.List;
 public class WindowDBSCANProcess implements WindowProcessInterface{
 
     private XMLConfiguration config;
-    private ArrayList<GenericInstance> instances;
+    private ArrayList<Instance> instances;
 
     public WindowDBSCANProcess(){
         instances = new ArrayList<>();

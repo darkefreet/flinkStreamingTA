@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <!--PICK ONE SOURCE-->
-    <source>
-        <name>twitter</name>
-        <properties-file>twitter.properties</properties-file>
-    </source>
+    <!--<source>-->
+        <!--<name>twitter</name>-->
+        <!--<properties-file>twitter.properties</properties-file>-->
+    <!--</source>-->
     <!--<source>-->
     <!--<name>bitcoin</name>-->
     <!--<properties-file>bitcoin.properties</properties-file>-->
     <!--</source>-->
-    <!--<source>-->
-    <!--<name>socket</name>-->
-    <!--<ip>localhost</ip>-->
-    <!--<port>4542</port>-->
-    <!--</source>-->
+    <source>
+        <name>socket</name>
+        <ip>localhost</ip>
+        <port>4542</port>
+    </source>
 
     <!--DATA TYPE AND FILTERS-->
     <data>
@@ -60,8 +60,8 @@
             <attribute>
                 <path>text</path>
                 <type>text</type><!--options : "text" | "numeric" -->
-                <weight>1000.0</weight><!--for standardized attribute weight-->
-                <svdFunction>dot</svdFunction>
+                <weight>1.0</weight><!--for standardized attribute weight-->
+                <svdFunction>cosine</svdFunction>
             </attribute>
         </attributes>
         <resultsData>

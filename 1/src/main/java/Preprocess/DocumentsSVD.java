@@ -158,7 +158,7 @@ public class DocumentsSVD implements Serializable{
                 addTermVector(term, queryVector);
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            List<String> a = new ArrayList<>();
+            List<ClassifyDocumentsResult> a = new ArrayList<>();
             Map<String, Tuple2<Double,Integer>> totals = new HashMap<>();
             for(String label : labels){
                 Tuple2<Double,Integer> tup = new Tuple2<>();
@@ -167,25 +167,37 @@ public class DocumentsSVD implements Serializable{
             }
             for (int j = 0; j < docVectors.length; ++j) {
                 double score;
+                String label = documents.get(j).getLabel();
                 if(function.equals("dot")) {
                     score = dotProduct(queryVector, docVectors[j], scales);
+                    if(!Double.isNaN(score)) {
+                        if(score > totals.get(label).f0){
+                            totals.get(label).setField(score, 0);
+                        }
+                    }
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
-                }
-                String label = documents.get(j).getLabel();
-                if(!Double.isNaN(score)) {
-                    if(score > totals.get(label).f0){
-                        totals.get(label).setField(score, 0);
+                    if(!Double.isNaN(score)) {
+                        totals.get(label).setField(totals.get(label).f0+score,0);
+                        totals.get(label).setField(totals.get(label).f1+1,1);
                     }
                 }
             }
 
             for(String k : totals.keySet()){
-                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0, k);
-                a.add(objectMapper.writeValueAsString(c));
-                ret = objectMapper.writeValueAsString(a);
+                if(function.equals("dot")) {
+                    ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0, k);
+                    a.add(c);
+                    ret = objectMapper.writeValueAsString(a);
+                }
+                else{
+                    if(totals.get(k).f1<1)
+                        totals.get(k).setField(1,1);
+                    ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0/totals.get(k).f1, k);
+                    a.add(c);
+                    ret = objectMapper.writeValueAsString(a);
+                }
             }
-
         }
         return ret;
     }
@@ -201,7 +213,6 @@ public class DocumentsSVD implements Serializable{
                 addTermVector(term, queryVector);
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            List<String> a = new ArrayList<>();
             Map<String, Tuple2<Double,Integer>> totals = new HashMap<>();
             for(String label : labels){
                 Tuple2<Double,Integer> tup = new Tuple2<>();
@@ -210,28 +221,33 @@ public class DocumentsSVD implements Serializable{
             }
             for (int j = 0; j < docVectors.length; ++j) {
                 double score;
+                String label = documents.get(j).getLabel();
                 if(function.equals("dot")) {
                     score = dotProduct(queryVector, docVectors[j], scales);
+                    if(!Double.isNaN(score)) {
+                        if(score > totals.get(label).f0){
+                            totals.get(label).setField(score, 0);
+                        }
+                    }
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
-                }
-                String label = documents.get(j).getLabel();
-                if(!Double.isNaN(score)) {
-                    if(score > totals.get(label).f0){
-                        totals.get(label).setField(score, 0);
+                    if(!Double.isNaN(score)) {
+                        totals.get(label).setField(totals.get(label).f0+score,0);
+                        totals.get(label).setField(totals.get(label).f1+1,1);
                     }
                 }
             }
 
-            double score = totals.get(target).f0;
-            for(String k : totals.keySet()){
-                if(!k.equals(target)){
-                    score -= totals.get(k).f0;
-                }
-
+            if(function.equals("dot")) {
+                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0, target);
+                ret = objectMapper.writeValueAsString(c);
+            }else{
+                if(totals.get(target).f1<1)
+                    totals.get(target).setField(1,1);
+                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0/totals.get(target).f1, target);
+                ret = objectMapper.writeValueAsString(c);
             }
-            ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0, target);
-            ret = objectMapper.writeValueAsString(c);
+
         }
         return ret;
     }

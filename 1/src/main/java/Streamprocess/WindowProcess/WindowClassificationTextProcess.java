@@ -24,12 +24,16 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
     private XMLConfiguration config;
     private ArrayList<GenericInstance> instances;
     private static DocumentsSVD documentsSVD;
+    private static transient ObjectMapper jsonParser;
 
     public WindowClassificationTextProcess() throws IOException, ClassNotFoundException {
         if(documentsSVD==null) {
             FileInputStream myFileInputStream = new FileInputStream("resource/svdDocuments");
             ObjectInputStream myObjectInputStream = new ObjectInputStream(myFileInputStream);
             documentsSVD = (DocumentsSVD) myObjectInputStream.readObject();
+        }
+        if(jsonParser == null){
+            jsonParser = new ObjectMapper();
         }
         instances = new ArrayList<>();
     }
@@ -39,6 +43,9 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
             FileInputStream myFileInputStream = new FileInputStream("resource/svdDocuments");
             ObjectInputStream myObjectInputStream = new ObjectInputStream(myFileInputStream);
             documentsSVD = (DocumentsSVD) myObjectInputStream.readObject();
+        }
+        if(jsonParser == null){
+            jsonParser = new ObjectMapper();
         }
         config = _config;
         instances = new ArrayList<>();
@@ -70,7 +77,9 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
                     case "text": {
                         if (documentsSVD.doesHasModel()) {
                             try {
-                                testInstance.addNewData("class",documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction"),"promo").replaceAll("\\\\",""));
+                                String res = documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction").replaceAll("\\\\",""));
+                                JsonNode j = jsonParser.readTree(res);
+                                testInstance.addJson("class",j);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
