@@ -170,39 +170,28 @@ public class DocumentsSVD implements Serializable{
                 String label = documents.get(j).getLabel();
                 if(function.equals("dot")) {
                     score = dotProduct(queryVector, docVectors[j], scales);
-                    if(!Double.isNaN(score)) {
-                        if(score > totals.get(label).f0){
-                            totals.get(label).setField(score, 0);
-                        }
-                    }
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
-                    if(!Double.isNaN(score)) {
-                        totals.get(label).setField(totals.get(label).f0+score,0);
-                        totals.get(label).setField(totals.get(label).f1+1,1);
-                    }
+                }
+                if(!Double.isNaN(score)) {
+                    totals.get(label).setField(totals.get(label).f0+score,0);
+                    totals.get(label).setField(totals.get(label).f1+1,1);
                 }
             }
 
             for(String k : totals.keySet()){
-                if(function.equals("dot")) {
-                    ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0, k);
-                    a.add(c);
-                    ret = objectMapper.writeValueAsString(a);
-                }
-                else{
-                    if(totals.get(k).f1<1)
-                        totals.get(k).setField(1,1);
-                    ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0/totals.get(k).f1, k);
-                    a.add(c);
-                    ret = objectMapper.writeValueAsString(a);
-                }
+                if(totals.get(k).f1<1)
+                    totals.get(k).setField(1,1);
+                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(k).f0/totals.get(k).f1, k);
+                a.add(c);
+                ret = objectMapper.writeValueAsString(a);
+
             }
         }
         return ret;
     }
 
-    public String classify(String arg, String function,String target) throws IOException {
+    public String classify(String arg, String function,String target,Double threshold) throws IOException {
         String ret = "";
         if(hasModel) {
             NormalizeSentence normalize = new NormalizeSentence(arg.toLowerCase());
@@ -224,30 +213,22 @@ public class DocumentsSVD implements Serializable{
                 String label = documents.get(j).getLabel();
                 if(function.equals("dot")) {
                     score = dotProduct(queryVector, docVectors[j], scales);
-                    if(!Double.isNaN(score)) {
-                        if(score > totals.get(label).f0){
-                            totals.get(label).setField(score, 0);
-                        }
-                    }
                 }else {
                     score = cosine(queryVector, docVectors[j], scales);
-                    if(!Double.isNaN(score)) {
-                        totals.get(label).setField(totals.get(label).f0+score,0);
-                        totals.get(label).setField(totals.get(label).f1+1,1);
-                    }
+                }
+                if(!Double.isNaN(score)) {
+                    totals.get(label).setField(totals.get(label).f0+score,0);
+                    totals.get(label).setField(totals.get(label).f1+1,1);
                 }
             }
 
-            if(function.equals("dot")) {
-                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0, target);
-                ret = objectMapper.writeValueAsString(c);
-            }else{
-                if(totals.get(target).f1<1)
-                    totals.get(target).setField(1,1);
-                ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0/totals.get(target).f1, target);
-                ret = objectMapper.writeValueAsString(c);
-            }
-
+            String result = target;
+            if(totals.get(target).f1<1)
+                totals.get(target).setField(1,1);
+            if(totals.get(target).f0/totals.get(target).f1<threshold)
+                result = "not " + target;
+            ClassifyDocumentsResult c = new ClassifyDocumentsResult(totals.get(target).f0/totals.get(target).f1, result);
+            ret = objectMapper.writeValueAsString(c);
         }
         return ret;
     }

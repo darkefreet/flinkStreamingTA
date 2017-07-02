@@ -77,7 +77,7 @@ public class WindowClassificationTextProcess implements WindowProcessInterface {
                     case "text": {
                         if (documentsSVD.doesHasModel()) {
                             try {
-                                String res = documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction").replaceAll("\\\\",""));
+                                String res = documentsSVD.classify(temp.getTextValue(), h.getString("svdFunction"), h.getString("target"),h.getDouble("threshold"));
                                 JsonNode j = jsonParser.readTree(res);
                                 testInstance.addJson("class",j);
                             } catch (IOException e) {

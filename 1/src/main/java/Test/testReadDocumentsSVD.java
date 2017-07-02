@@ -18,6 +18,6 @@ public class testReadDocumentsSVD {
         if(docSVD.doesHasModel()){
             System.out.println("test");
         }
-        System.out.println(docSVD.classify("jangan asal bicara kamu","dot","promo"));
+        System.out.println(docSVD.classify("jangan asal bicara kamu","dot","promo",1.0));
     }
 }

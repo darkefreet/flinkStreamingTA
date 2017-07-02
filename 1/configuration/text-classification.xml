@@ -62,6 +62,8 @@
                 <type>text</type><!--options : "text" | "numeric" -->
                 <weight>1.0</weight><!--for standardized attribute weight-->
                 <svdFunction>cosine</svdFunction>
+                <target>promo</target>
+                <threshold>0.8</threshold>
             </attribute>
         </attributes>
         <resultsData>
