@@ -19,30 +19,7 @@
     <data>
         <type>json</type>
         <id>tx_index</id>
-        <filtersConfiguration>
-            <filter>
-                <dataType>integer</dataType>
-                <attribute>x.size</attribute>
-                <value>100</value>
-                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
-            </filter>
-            <filter>
-                <dataType>count</dataType>
-                <attribute>x.out</attribute>
-                <value>1</value>
-                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
-            </filter>
-            <!--<filter>-->
-                <!--<dataType>total</dataType>-->
-                <!--<attribute>x.inputs.prev_out.value</attribute>-->
-                <!--<value>2500</value>-->
-                <!--<comparison>></comparison>-->
-            <!--</filter>-->
-        </filtersConfiguration>
-        <partitionConfiguration>
-            <anyPartition>true</anyPartition>
-            <path>x.out</path><!-- accepting array only-->
-        </partitionConfiguration>
+        <filter>{x.size}>=100</filter>
     </data>
 
     <!--KEY FOR STREAM DATA-->
@@ -65,7 +42,7 @@
         <distance>euclidean</distance>
         <attributes>
             <attribute>
-                <path>value</path>
+                <path>x.size</path>
                 <type>numeric</type><!--options : "text" | "numeric" -->
                 <weight>0.0005</weight><!--for standardized attribute weight-->
                 <!--<svdFunction>cosine</svdFunction>-->

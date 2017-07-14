@@ -19,28 +19,7 @@
     <data>
         <type>json</type>
         <id>id</id>
-        <filtersConfiguration>
-            <filter>
-                <dataType>string</dataType>
-                <attribute>lang</attribute>
-                <value>in</value>
-            </filter>
-            <filter>
-                <dataType>integer</dataType>
-                <attribute>user.friends_count</attribute>
-                <value>5</value>
-                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
-            </filter>
-            <filter>
-                <dataType>count</dataType>
-                <attribute>entities.hashtags</attribute>
-                <value>0</value>
-                <comparison>>=</comparison><!--options: ">" | ">=" | "==" | "!=" | "<=" | "<"-->
-            </filter>
-        </filtersConfiguration>
-        <partitionConfiguration>
-            <anyPartition>false</anyPartition>
-        </partitionConfiguration>
+        <filter>{lang}==in AND {user.friends_count} >= 5</filter>
     </data>
 
     <!--KEY FOR STREAM DATA-->
@@ -61,9 +40,9 @@
                 <path>text</path>
                 <type>text</type><!--options : "text" | "numeric" -->
                 <weight>1.0</weight><!--for standardized attribute weight-->
-                <svdFunction>cosine</svdFunction>
+                <svdFunction>dot</svdFunction>
                 <target>promo</target>
-                <threshold>0.8</threshold>
+                <threshold>1.0</threshold>
             </attribute>
         </attributes>
         <resultsData>

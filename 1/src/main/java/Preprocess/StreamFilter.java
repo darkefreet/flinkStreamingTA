@@ -18,14 +18,12 @@ public class StreamFilter {
     private ObjectMapper jsonParser;
     private XMLConfiguration config;
     private SQLLikeFilter sqlFilter;
-    private JSONPathTraverse jsonTraverse;
 
     public StreamFilter(XMLConfiguration _config)
     {
         jsonParser = new ObjectMapper();
         config = _config;
         sqlFilter = new SQLLikeFilter();
-        jsonTraverse = new JSONPathTraverse();
     }
 
 
@@ -33,40 +31,9 @@ public class StreamFilter {
         if(jsonParser ==null){
             jsonParser = new ObjectMapper();
         }
-        List<HierarchicalConfiguration> hconfig = config.configurationsAt("data.filtersConfiguration.filter");
-        boolean ret = true;
+        String configuration = config.getString("data.filter");
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
-        for (HierarchicalConfiguration h : hconfig){
-            JsonNode temp = jsonTraverse.solve(h.getString("attribute"),jsonNode);
-            if(temp==null){
-                ret = false;
-                break;
-            }
-            else {
-                switch (h.getString("dataType")) {
-                    case "string": {
-                        if (!temp.getTextValue().equals(h.getString("value")))
-                            ret = false;
-                        break;
-                    }
-                    case "integer" :{
-                        if(!sqlFilter.compareNumber(temp.getDoubleValue(),h.getDouble("value"),h.getString("comparison")))
-                            ret = false;
-                        break;
-                    }
-                    case "count":{
-                        if(temp.isArray()) {
-                            if (!sqlFilter.compareNumber(temp.size(), h.getDouble("value"), h.getString("comparison")))
-                                ret = false;
-                        }
-                        else{
-                            ret = false;
-                        }
-                    break;
-                    }
-                }
-            }
-        }
+        boolean ret = sqlFilter.solve(configuration,jsonNode);
         return ret;
     }
 }

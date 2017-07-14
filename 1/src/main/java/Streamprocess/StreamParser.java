@@ -43,19 +43,10 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                 StreamFilter streamFilter = new StreamFilter(configs.get(configIndex));
                 if(streamFilter.filter(value)){
                     if(jsonNode!=null) {
-                        if(configs.get(configIndex).getString("data.partitionConfiguration.anyPartition").equals("true")){
-                            StreamPartition part= new StreamPartition(configs.get(configIndex));
-                            for(JsonNode j: part.partition(value)){
-                                String path = configs.get(configIndex).getString("data.id");
-                                Instance inst = new Instance(pathTraverse.solve(path,j).getTextValue(),j);
-                                out.collect(inst);
-                            }
-                        }else {
-                            String path = configs.get(configIndex).getString("data.id");
-                            if(jsonNode!=null && path!=null) {
-                                Instance inst = new Instance(null, jsonNode);
-                                out.collect(inst);
-                            }
+                        String path = configs.get(configIndex).getString("data.id");
+                        if(jsonNode!=null && path!=null) {
+                            Instance inst = new Instance(null, jsonNode);
+                            out.collect(inst);
                         }
                     }
                 }

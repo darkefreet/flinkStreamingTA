@@ -46,8 +46,8 @@ public class testSQLFilter {
                         }
                         JsonNode jsonNode = jsonParser.readValue(s, JsonNode.class);
                         if (jsonNode.has("lang")) {
-                            if (jsonNode.get("lang").getTextValue().equals("in")) {
-                                String text = jsonNode.get("text").getTextValue().replaceAll("\\n", " ");
+                            if (jsonNode.get("lang").getValueAsText().equals("in")) {
+                                String text = jsonNode.get("text").getValueAsText().replaceAll("\\n", " ");
                                 collector.collect(text);
                             }
                         }

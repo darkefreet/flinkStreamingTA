@@ -74,12 +74,12 @@ public class DocumentsSVD implements Serializable{
                 URL url = new URL("file:"+file.getCanonicalPath());
                 JsonNode json = jsonParser.readValue(url, JsonNode.class);
                 Document doc= new Document();
-                doc.setLabel(json.get(label).getTextValue());
-                String res = json.get(isi).getTextValue().toLowerCase();
+                doc.setLabel(json.get(label).getValueAsText());
+                String res = json.get(isi).getValueAsText().toLowerCase();
                 NormalizeSentence normalize = new NormalizeSentence(res);
                 doc.setResource(normalize.getSentence());
                 doc.countWords();
-                labels.add(json.get(label).getTextValue());
+                labels.add(json.get(label).getValueAsText());
                 documents.add(doc);
             }
         }
