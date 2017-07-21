@@ -4,8 +4,6 @@ import org.apache.flink.api.common.functions.StoppableFunction;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import com.satori.rtm.*;
 import com.satori.rtm.model.*;
-import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.hadoop.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +14,17 @@ import java.util.Queue;
 /**
  * Created by wilhelmus on 15/06/17.
  */
-public class BitCoinStream extends RichSourceFunction<String> implements StoppableFunction {
+public class BitCoinSource extends RichSourceFunction<String> implements StoppableFunction {
 
     private Properties properties;
     static final String endpoint = "wss://open-data.api.satori.com";
     static final String channel = "bitcoin-transactions";
-    private static final Logger LOG = LoggerFactory.getLogger(BitCoinStream.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BitCoinSource.class);
 
     private transient RtmClient client;
     private transient Queue<String> queue;
 
-    public BitCoinStream(Properties prop){
+    public BitCoinSource(Properties prop){
         checkProperty(prop,"appKey");
         this.properties = prop;
     }

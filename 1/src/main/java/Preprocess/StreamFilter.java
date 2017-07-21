@@ -31,7 +31,7 @@ public class StreamFilter {
         if(jsonParser ==null){
             jsonParser = new ObjectMapper();
         }
-        String configuration = config.getString("data.filter");
+        String configuration = config.getString("dataTransformation.filter");
         JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);
         boolean ret = sqlFilter.solve(configuration,jsonNode);
         return ret;

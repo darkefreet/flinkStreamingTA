@@ -18,15 +18,29 @@ package flinkstreaming;
  * limitations under the License.
  */
 
+import DataProcess.WindowStreamProcess;
+import DataSource.BitCoinSource;
+import Model.Instances.Instance;
+import DataProcess.StreamParser;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
+import org.apache.flink.streaming.api.windowing.assigners.*;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
+import org.apache.flink.streaming.connectors.twitter.TwitterSource;
+import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
+import org.apache.flink.util.Collector;
+import org.apache.hadoop.util.Time;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.io.FileInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Properties;
 
 
 /**
@@ -51,7 +65,46 @@ import java.util.concurrent.Future;
  */
 public class StreamingJob {
 
+	private static XMLConfiguration config;
+	private static DataStream<String> source;
+	private static TwitterSource twitterSource;
+	private static BitCoinSource bitCoinSource;
 
+	private static void sinkFunction(DataStream<String> sinkSource, SubnodeConfiguration subconf){
+		switch(subconf.getString("type")){
+			case "print":{
+				sinkSource.print();
+				break;
+			}
+			case "kafka":{
+				String ipPort = subconf.configurationAt("type").getString("[@ip]")+":"+subconf.configurationAt("type").getString("[@port]");
+				FlinkKafkaProducer09<String> myProducer = new FlinkKafkaProducer09<String>(
+						ipPort,            											// broker list
+						subconf.configurationAt("type").getString("[@topic]"),      // target topic
+						new SimpleStringSchema());   // serialization schema
+				// the following is necessary for at-least-once delivery guarantee
+				myProducer.setLogFailuresOnly(true);   // "false" by default
+				myProducer.setFlushOnCheckpoint(true);  // "false" by default
+				sinkSource.addSink(myProducer);
+				break;
+			}
+			case "text":{
+				sinkSource.writeAsText(subconf.configurationAt("type").getString("[@path]")).setParallelism(1);
+				break;
+			}
+			case "csv":{
+				sinkSource.writeAsCsv(subconf.configurationAt("type").getString("[@path]")).setParallelism(1);
+				break;
+			}
+			case "socket":{
+
+				break;
+			}
+			default:{
+				//do nothing
+			}
+		}
+	}
 
 	public static void main(String[] args) throws Exception {
 
@@ -59,29 +112,143 @@ public class StreamingJob {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment
 				.getExecutionEnvironment();
 
-		ArrayList<XMLConfiguration> configs = new ArrayList<>();
+		config = new XMLConfiguration("configuration/bitcoin.xml");
 
-		File folder = new File("configuration");
-		File[] listOfFiles = folder.listFiles();
-		ExecutorService executor = Executors.newFixedThreadPool(listOfFiles.length);
-		for (int i = 0; i < listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile()) {
-				configs.add(new XMLConfiguration(listOfFiles[i].getCanonicalPath()));
+		//LISTING SOURCES AND UNION SOURCES INTO A SINGLE DATASTREAM SOURCE
+		List<HierarchicalConfiguration> hconfig = config.configurationsAt("sources.source");
+		for(HierarchicalConfiguration con : hconfig){
+			switch(con.getString("")){
+				case "socket":{
+					if(source==null)
+						source = env.socketTextStream(con.getString("[@ip]"),con.getInt("[@port]"),"\n", 0);
+					else
+						source = source.union(env.socketTextStream(con.getString("[@ip]"),con.getInt("[@port]"),"\n", 0));
+					break;
+				}
+				case "twitter":{
+					if(twitterSource==null)
+						twitterSource = new TwitterSource(con.getString("[@properties]"));
+					if(source==null)
+						source = env.addSource(twitterSource);
+					else
+						source = source.union(env.addSource(twitterSource));
+					break;
+				}
+				case "bitcoin":{
+					if(bitCoinSource==null) {
+						Properties prop = new Properties();
+						FileInputStream input = new FileInputStream(con.getString("[@properties]"));
+						prop.load(input);
+						bitCoinSource = new BitCoinSource(prop);
+					}
+					if(source==null)
+						source = env.addSource(bitCoinSource);
+					else
+						source = source.union(env.addSource(bitCoinSource));
+					break;
+				}
+				default:{
+					//do nothing
+				}
 			}
 		}
 
-		int fileIndex = 0;
-		for (int i = 0; i < listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile()) {
-				Future future = executor.submit(new StreamProcess(env,configs,fileIndex));
-				future.get();
-				fileIndex++;
-			}
+		//Stream parsing and Stream transformation
+		DataStream<Instance> streamOutput =
+				source.flatMap(new StreamParser(config)).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
+					@Override
+					public long extractAscendingTimestamp(Instance element) {
+						return Time.now();
+					}
+				});
+
+		if(config.configurationAt("dataTransformation.dataSink").getBoolean("[@status]")){
+			DataStream<String> sinkSource = streamOutput.flatMap(new FlatMapFunction<Instance, String>() {
+				@Override
+				public void flatMap(Instance instance, Collector<String> collector){
+					collector.collect(instance.toString());
+				}
+			});
+			sinkFunction(sinkSource,config.configurationAt("dataTransformation.dataSink"));
 		}
 
+		KeySelector keySelect = new KeySelector<Instance, String>() {
+			public String getKey(Instance inst) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+				switch (config.getString("window.keyBy")) {
+					case "static":
+						return config.configurationAt("window.keyBy").getString("[@value]");
+					case "id":
+						return inst.getId();
+					default:
+						return "1";
+				}
+			}
+
+		};
+
+		if(config.configurationAt("window").getBoolean("[@status]")){
+			DataStream<String> windowedStream;
+			Long windowTime = 0L;
+			Long overlapTime = 0L;
+			windowTime = windowTime + (config.getInt("window.size.hours")*3600) + (config.getInt("window.size.minutes")*60) + (config.getInt("window.size.seconds"));
+			overlapTime = overlapTime + (config.getInt("window.overlap.hours")*3600) + (config.getInt("window.overlap.minutes")*60) + (config.getInt("window.overlap.seconds"));
+			switch(config.getString("window.type")){
+				case "tumbling": {
+					switch (config.getString("window.time")) {
+						case "event": {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+						default: {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(TumblingProcessingTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+					}
+					break;
+				}
+				case "sliding":{
+					switch (config.getString("window.time")) {
+						case "event": {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(SlidingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime), org.apache.flink.streaming.api.windowing.time.Time.seconds(overlapTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+						default: {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(SlidingProcessingTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime), org.apache.flink.streaming.api.windowing.time.Time.seconds(overlapTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+					}
+					break;
+				}
+				default:{
+					switch (config.getString("window.time")) {
+						case "event": {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(EventTimeSessionWindows.withGap(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+						default: {
+							windowedStream = streamOutput.keyBy(keySelect)
+									.window(ProcessingTimeSessionWindows.withGap(org.apache.flink.streaming.api.windowing.time.Time.seconds(windowTime)))
+									.apply(new WindowStreamProcess(config));
+							break;
+						}
+					}
+					break;
+				}
+			}
+			if(config.configurationAt("window.dataSink").getBoolean("[@status]"))
+				sinkFunction(windowedStream,config.configurationAt("window.dataSink"));
+		}
 		env.execute();
-		executor.shutdown();
-
 	}
 
 }

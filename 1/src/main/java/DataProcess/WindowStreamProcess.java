@@ -1,7 +1,6 @@
-package Streamprocess;
+package DataProcess;
 
 import Model.Instances.Instance;
-import Preprocess.DocumentsSVD;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
@@ -9,7 +8,6 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 
 
 /**
@@ -17,23 +15,22 @@ import java.util.ArrayList;
  */
 public class WindowStreamProcess implements WindowFunction<Instance, String, String, TimeWindow> {
 
-    private static transient ArrayList<XMLConfiguration> configs;
-    private int configIndex;
+    private static transient XMLConfiguration config;
 
-    public WindowStreamProcess( ArrayList<XMLConfiguration> _configs,int index) throws ConfigurationException {
-        configs = _configs;
-        configIndex = index;
+    public WindowStreamProcess( XMLConfiguration _config) throws ConfigurationException {
+        config = _config;
     }
 
     @Override
     public void apply(String s, TimeWindow timeWindow, Iterable<Instance> iterable, Collector<String> collector) throws Exception {
-        Class cl = Class.forName(configs.get(configIndex).getString("dataMining.processingClass"));
-        Constructor con = cl.getConstructor(XMLConfiguration.class);
-        Object obj = con.newInstance(configs.get(configIndex));
+        Class cl = Class.forName(config.getString("window.processingClass"));
+        Constructor con = cl.getConstructor();
+        Object obj = con.newInstance();
         for (Instance instance : iterable) {
             obj.getClass().getDeclaredMethod("preProcessData",instance.getClass()).invoke(obj,instance);
         }
-        collector.collect(obj.getClass().getDeclaredMethod("processData").invoke(obj).toString());
+        String ret = String.class.cast(obj.getClass().getDeclaredMethod("processData").invoke(obj));
+        collector.collect(ret);
     }
 
 }

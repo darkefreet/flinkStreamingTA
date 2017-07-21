@@ -1,6 +1,5 @@
 package Model.Clustering;
 
-import Model.Instances.GenericInstance;
 import Model.Instances.Instance;
 
 import java.util.ArrayList;

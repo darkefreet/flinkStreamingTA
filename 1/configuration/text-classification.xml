@@ -1,57 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-    <!--PICK ONE SOURCE-->
-    <!--<source>-->
-        <!--<name>twitter</name>-->
-        <!--<properties-file>twitter.properties</properties-file>-->
-    <!--</source>-->
-    <!--<source>-->
-    <!--<name>bitcoin</name>-->
-    <!--<properties-file>bitcoin.properties</properties-file>-->
-    <!--</source>-->
-    <source>
-        <name>socket</name>
-        <ip>localhost</ip>
-        <port>4542</port>
-    </source>
+    <sources>
+        <source ip="" port="" properties="twitter.properties">twitter</source>
+        <!--<source ip="localhost" port="4542" properties="">socket</source>-->
+    </sources>
 
-    <!--DATA TYPE AND FILTERS-->
-    <data>
+    <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
+    <dataTransformation>
         <type>json</type>
         <id>id</id>
         <filter>{lang}==in AND {user.friends_count} >= 5</filter>
-    </data>
-
-    <!--KEY FOR STREAM DATA-->
-    <keyBy>
-        <type>static</type>
-        <value>1</value>
-    </keyBy>
-    <!--<keyBy>-->
-    <!--<type>object</type>-->
-    <!--<function>getId</function>-->
-    <!--</keyBy>-->
-
-    <!--DATA MINING CONFIGURATION-->
-    <dataMining>
-        <processingClass>Streamprocess.WindowProcess.WindowClassificationTextProcess</processingClass>
-        <attributes>
-            <attribute>
-                <path>text</path>
-                <type>text</type><!--options : "text" | "numeric" -->
-                <weight>1.0</weight><!--for standardized attribute weight-->
-                <svdFunction>dot</svdFunction>
-                <target>promo</target>
-                <threshold>1.0</threshold>
-            </attribute>
-        </attributes>
-        <resultsData>
+        <processingClass>DataProcess.StreamProcess.ClassifyPromo</processingClass>
+        <numericAttributes status="true">
+            <attribute weight="1.0">user.friends_count</attribute>
+        </numericAttributes>
+        <dataSink status="true">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+        <dataIncluded>
             <path>text</path>
-        </resultsData>
-    </dataMining>
+        </dataIncluded>
+    </dataTransformation>
 
     <!--WINDOW CONFIGURATION-->
-    <window>
+    <windows status="false">
+        <!--KEY FOR STREAM DATA-->
+        <keyBy value="1">static</keyBy>
         <type>tumbling</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
@@ -64,29 +38,10 @@
             <minutes>0</minutes>
             <seconds>30</seconds>
         </overlap>
-    </window>
-
-    <!--SINK CONFIGURATION-->
-    <!--<windowSink>-->
-        <!--<type>kafka</type>-->
-        <!--<topic>tweet-classification</topic>-->
-        <!--<ipPort>localhost:9092</ipPort>-->
-    <!--</windowSink>-->
-    <windowSink>
-    <type>print</type>
-    </windowSink>
-    <!--<windowSink>-->
-    <!--<type>csv</type>-->
-    <!--<path>csvOutput</path>-->
-    <!--</windowSink>-->
-    <!--<windowSink>-->
-    <!--<type>text</type>-->
-    <!--<path>textOutput</path>-->
-    <!--</windowSink>-->
-    <!--<windowSink>-->
-    <!--<type>socket</type>-->
-    <!--<ip>localhost</ip>-->
-    <!--<port>4543</port>-->
-    <!--</windowSink>-->
+        <processingClass/>
+        <dataSink status="false">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+    </windows>
 
 </configuration>

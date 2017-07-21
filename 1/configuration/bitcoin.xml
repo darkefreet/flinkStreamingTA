@@ -1,60 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-    <!--PICK ONE SOURCE-->
-    <!--<source>-->
-        <!--<name>twitter</name>-->
-        <!--<properties-file>twitter.properties</properties-file>-->
-    <!--</source>-->
-    <source>
-        <name>bitcoin</name>
-        <properties-file>bitcoin.properties</properties-file>
-    </source>
-    <!--<source>-->
-        <!--<name>socket</name>-->
-        <!--<ip>localhost</ip>-->
-        <!--<port>4542</port>-->
-    <!--</source>-->
+    <sources>
+        <source ip="" port="" properties="bitcoin.properties">bitcoin</source>
+        <!--<source ip="localhost" port="4542" properties="">socket</source>-->
+    </sources>
 
-    <!--DATA TYPE, FILTERS AND PARTITIONS-->
-    <data>
+    <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
+    <dataTransformation>
         <type>json</type>
         <id>tx_index</id>
         <filter>{x.size}>=100</filter>
-    </data>
-
-    <!--KEY FOR STREAM DATA-->
-    <keyBy>
-        <type>static</type>
-        <value>2</value>
-    </keyBy>
-    <!--<keyBy>-->
-        <!--<type>object</type>-->
-        <!--<function>getId</function>-->
-    <!--</keyBy>-->
-
-    <!--DATA MINING CONFIGURATION-->
-    <dataMining>
-        <processingClass>Streamprocess.WindowProcess.WindowDBSCANProcess</processingClass>
-        <type>clustering</type>
-        <algorithm>dbscan</algorithm>
-        <maxDistance>20000.0</maxDistance>
-        <minClusters>3</minClusters>
-        <distance>euclidean</distance>
-        <attributes>
-            <attribute>
-                <path>x.size</path>
-                <type>numeric</type><!--options : "text" | "numeric" -->
-                <weight>0.0005</weight><!--for standardized attribute weight-->
-                <!--<svdFunction>cosine</svdFunction>-->
-            </attribute>
-        </attributes>
-        <resultsData>
+        <processingClass>DataProcess.StreamProcess.TransactionPartition</processingClass>
+        <numericAttributes status="true">
+            <attribute weight="0.0005">value</attribute>
+        </numericAttributes>
+        <dataSink status="false">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+        <dataIncluded>
             <path>*</path>
-        </resultsData>
-    </dataMining>
+        </dataIncluded>
+    </dataTransformation>
+
 
     <!--WINDOW CONFIGURATION-->
-    <window>
+    <window status="true">
+        <!--KEY FOR STREAM DATA-->
+        <keyBy value="1">static</keyBy>
         <type>sliding</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
@@ -67,6 +39,10 @@
             <minutes>0</minutes>
             <seconds>15</seconds>
         </overlap>
+        <processingClass>DataProcess.WindowProcess.WindowDBSCANProcess</processingClass>
+        <dataSink status="true">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
     </window>
 
     <!--SINK CONFIGURATION-->
@@ -75,21 +51,6 @@
         <!--<topic>bitcoin</topic>-->
         <!--<ipPort>localhost:9092</ipPort>-->
     <!--</windowSink>-->
-    <windowSink>
-    <type>print</type>
-    </windowSink>
-    <!--<windowSink>-->
-    <!--<type>csv</type>-->
-    <!--<path>csvOutput</path>-->
-    <!--</windowSink>-->
-    <!--<windowSink>-->
-    <!--<type>text</type>-->
-    <!--<path>textOutput</path>-->
-    <!--</windowSink>-->
-    <!--<windowSink>-->
-    <!--<type>socket</type>-->
-    <!--<ip>localhost</ip>-->
-    <!--<port>4543</port>-->
-    <!--</windowSink>-->
+
 
 </configuration>

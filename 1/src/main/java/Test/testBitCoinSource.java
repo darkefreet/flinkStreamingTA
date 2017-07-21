@@ -1,10 +1,8 @@
 package Test;
 
-import DataSource.BitCoinStream;
-import org.apache.flink.runtime.io.network.api.reader.Reader;
+import DataSource.BitCoinSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.twitter.TwitterSource;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -25,7 +23,7 @@ public class testBitCoinSource {
 
         Properties prop = new Properties();
         prop.load(input);
-        source = env.addSource(new BitCoinStream(prop));
+        source = env.addSource(new BitCoinSource(prop));
 //        source.writeAsText("bitcoin.txt").setParallelism(1);
         source.print();
         env.execute();
