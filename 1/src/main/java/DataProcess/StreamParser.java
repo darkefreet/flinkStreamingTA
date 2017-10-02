@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * Created by wilhelmus on 17/05/17.
  */
@@ -37,7 +38,6 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
         if(jsonParser ==null){
             jsonParser = new ObjectMapper();
         }
-
         switch(config.getString("dataTransformation.type")){
             case "json":{
                 JsonNode jsonNode = jsonParser.readValue(value,JsonNode.class);

@@ -17,7 +17,7 @@ public class KafkaConsumer {
                 .getExecutionEnvironment();
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "localhost:9092");
-        DataStream<String> stream = env.addSource(new FlinkKafkaConsumer09<String>("tweet-classification", new SimpleStringSchema(), properties));
+        DataStream<String> stream = env.addSource(new FlinkKafkaConsumer09<String>("twitter", new SimpleStringSchema(), properties));
 
         stream.print();
 

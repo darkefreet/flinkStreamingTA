@@ -204,6 +204,7 @@ under the License.
 	</profiles>
 
 	<build>
+		<finalName>StreamingJob</finalName>
 		<plugins>
 			<!-- We use the maven-shade plugin to create a fat jar that contains all dependencies
 			except flink and it's transitive dependencies. The resulting fat-jar can be executed
@@ -338,6 +339,20 @@ under the License.
 				<configuration>
 					<source>1.7</source> <!-- If you want to use Java 8, change this to "1.8" -->
 					<target>1.7</target> <!-- If you want to use Java 8, change this to "1.8" -->
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>fully.qualified.MainClass</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
 				</configuration>
 			</plugin>
 		</plugins>

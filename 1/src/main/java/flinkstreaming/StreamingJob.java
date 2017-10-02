@@ -31,6 +31,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.*;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
 import org.apache.flink.streaming.connectors.twitter.TwitterSource;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
@@ -112,7 +113,8 @@ public class StreamingJob {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment
 				.getExecutionEnvironment();
 
-		config = new XMLConfiguration("configuration/bitcoin.xml");
+		String fileConfig = args[0];
+		config = new XMLConfiguration(fileConfig);
 
 		//LISTING SOURCES AND UNION SOURCES INTO A SINGLE DATASTREAM SOURCE
 		List<HierarchicalConfiguration> hconfig = config.configurationsAt("sources.source");
@@ -147,6 +149,16 @@ public class StreamingJob {
 						source = source.union(env.addSource(bitCoinSource));
 					break;
 				}
+				case "kafka":{
+					Properties properties = new Properties();
+					properties.setProperty("bootstrap.servers", con.getString("[@ip]")+":"+con.getString("[@port]"));
+					DataStream<String> stream = env.addSource(new FlinkKafkaConsumer09<String>(con.getString("[@topic]"), new SimpleStringSchema(), properties));
+					if(source==null)
+						source = stream;
+					else
+						source = source.union(stream);
+					break;
+				}
 				default:{
 					//do nothing
 				}
@@ -155,12 +167,12 @@ public class StreamingJob {
 
 		//Stream parsing and Stream transformation
 		DataStream<Instance> streamOutput =
-				source.flatMap(new StreamParser(config)).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
-					@Override
-					public long extractAscendingTimestamp(Instance element) {
-						return Time.now();
-					}
-				});
+			source.flatMap(new StreamParser(config)).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Instance>() {
+				@Override
+				public long extractAscendingTimestamp(Instance element) {
+					return Time.now();
+				}
+			});
 
 		if(config.configurationAt("dataTransformation.dataSink").getBoolean("[@status]")){
 			DataStream<String> sinkSource = streamOutput.flatMap(new FlatMapFunction<Instance, String>() {

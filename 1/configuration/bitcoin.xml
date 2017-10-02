@@ -45,12 +45,4 @@
         </dataSink>
     </window>
 
-    <!--SINK CONFIGURATION-->
-    <!--<windowSink>-->
-        <!--<type>kafka</type>-->
-        <!--<topic>bitcoin</topic>-->
-        <!--<ipPort>localhost:9092</ipPort>-->
-    <!--</windowSink>-->
-
-
 </configuration>

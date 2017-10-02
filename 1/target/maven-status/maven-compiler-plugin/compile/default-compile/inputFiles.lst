@@ -1,0 +1,17 @@
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Test/testBitCoinSource.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Kafka/KafkaConsumer.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/flinkstreaming/StreamingJob.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Test/CollectTerms.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Test/CollectTweet.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Server/ServerDummy.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Model/Instances/Instance.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Preprocess/Calculation/SQLLikeFilter.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/DataSource/BitCoinSource.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Preprocess/StreamFilter.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Server/ClientDummy.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/DataProcess/StreamParser.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Test/getText.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/Preprocess/JSONPathTraverse.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/DataProcess/WindowProcess/WindowProcessInterface.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/DataProcess/WindowStreamProcess.java
+/home/wilhelmus/Documents/tugas_akhir/1/src/main/java/DataProcess/StreamProcess/StreamProcessInterface.java

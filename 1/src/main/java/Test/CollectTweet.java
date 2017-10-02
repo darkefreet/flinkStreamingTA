@@ -45,7 +45,7 @@ public class CollectTweet {
                     }
                 });
 
-        streamOutput.writeAsText("all-text.txt").setParallelism(1);
+//        streamOutput.writeAsText("all-text.txt").setParallelism(1);
 
         streamOutput.print();
         env.execute();

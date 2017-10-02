@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <sources>
+        <!--<source ip="" port="" properties="twitter.properties">twitter</source>-->
+        <source ip="localhost" port="4542" properties="">socket</source>
+    </sources>
+
+    <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
+    <dataTransformation>
+        <type>json</type>
+        <id>id</id>
+        <filter>{lang}==in AND {user.friends_count} >= 5</filter>
+        <processingClass>DataProcess.StreamProcess.ClassifyPromo</processingClass>
+        <numericAttributes status="true">
+            <attribute weight="1.0">user.friends_count</attribute>
+        </numericAttributes>
+        <dataSink status="true">
+            <type ip="localhost" port="9092" path="" topic="twitter">print</type>
+        </dataSink>
+        <dataIncluded>
+            <path>text</path>
+        </dataIncluded>
+    </dataTransformation>
+
+    <!--WINDOW CONFIGURATION-->
+    <window status="false">
+        <!--KEY FOR STREAM DATA-->
+        <keyBy value="1">static</keyBy>
+        <type>tumbling</type><!--options: tumbling / sliding / session -->
+        <time>process</time><!--options: event / process-->
+        <size>
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>10</seconds>
+        </size>
+        <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
+        </overlap>
+        <processingClass/>
+        <dataSink status="false">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+    </window>
+
+</configuration>

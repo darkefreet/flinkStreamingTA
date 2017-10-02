@@ -15,6 +15,17 @@
     <orderEntry type="library" name="lingpipe-4.1.2" level="project" />
     <orderEntry type="library" name="satori-rtm-sdk-1.0.3" level="project" />
     <orderEntry type="library" name="satori-sdk-java-core-1.0.2" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$APPLICATION_HOME_DIR$/lib/groovy-all-2.4.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="IndonesianPromoClassification" level="project" />
+    <orderEntry type="library" name="BitCoinDBSCAN" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-java:1.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-core:1.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-annotations:1.2.0" level="project" />
@@ -108,14 +119,5 @@
     <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler:2.10.4" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.janino:janino:3.0.6" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.janino:commons-compiler:3.0.6" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/groovy-all-2.4.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
