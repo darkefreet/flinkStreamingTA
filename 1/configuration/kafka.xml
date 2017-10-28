@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <sources>
-        <source ip="localhost" port="9092" topic="twitter" properties="">kafka</source>
-        <!--<source ip="localhost" port="4542" properties="">socket</source>-->
+        <source ip="localhost" port="9092" topic="twitter" properties="" channel="">kafka</source>
+        <!--<source ip="localhost" port="4542" properties="" channel="">socket</source>-->
     </sources>
 
     <!--DATA FILTERING AND SINGLE DATA PROCESSING-->

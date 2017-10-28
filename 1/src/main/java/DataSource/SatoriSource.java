@@ -14,18 +14,19 @@ import java.util.Queue;
 /**
  * Created by wilhelmus on 15/06/17.
  */
-public class BitCoinSource extends RichSourceFunction<String> implements StoppableFunction {
+public class SatoriSource extends RichSourceFunction<String> implements StoppableFunction {
 
     private Properties properties;
     static final String endpoint = "wss://open-data.api.satori.com";
-    static final String channel = "bitcoin-transactions";
-    private static final Logger LOG = LoggerFactory.getLogger(BitCoinSource.class);
+    private String channel;
+    private static final Logger LOG = LoggerFactory.getLogger(SatoriSource.class);
 
     private transient RtmClient client;
     private transient Queue<String> queue;
 
-    public BitCoinSource(Properties prop){
+    public SatoriSource(Properties prop, String _channel){
         checkProperty(prop,"appKey");
+        this.channel = _channel;
         this.properties = prop;
     }
 

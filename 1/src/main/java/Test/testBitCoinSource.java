@@ -1,6 +1,6 @@
 package Test;
 
-import DataSource.BitCoinSource;
+import DataSource.SatoriSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -23,7 +23,7 @@ public class testBitCoinSource {
 
         Properties prop = new Properties();
         prop.load(input);
-        source = env.addSource(new BitCoinSource(prop));
+        source = env.addSource(new SatoriSource(prop,"bitcoin-transactions"));
 //        source.writeAsText("bitcoin.txt").setParallelism(1);
         source.print();
         env.execute();

@@ -19,7 +19,7 @@ package flinkstreaming;
  */
 
 import DataProcess.WindowStreamProcess;
-import DataSource.BitCoinSource;
+import DataSource.SatoriSource;
 import Model.Instances.Instance;
 import DataProcess.StreamParser;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -69,7 +69,7 @@ public class StreamingJob {
 	private static XMLConfiguration config;
 	private static DataStream<String> source;
 	private static TwitterSource twitterSource;
-	private static BitCoinSource bitCoinSource;
+	private static SatoriSource satoriSource;
 
 	private static void sinkFunction(DataStream<String> sinkSource, SubnodeConfiguration subconf){
 		switch(subconf.getString("type")){
@@ -136,17 +136,17 @@ public class StreamingJob {
 						source = source.union(env.addSource(twitterSource));
 					break;
 				}
-				case "bitcoin":{
-					if(bitCoinSource==null) {
+				case "satori":{
+					if(satoriSource ==null) {
 						Properties prop = new Properties();
 						FileInputStream input = new FileInputStream(con.getString("[@properties]"));
 						prop.load(input);
-						bitCoinSource = new BitCoinSource(prop);
+						satoriSource = new SatoriSource(prop,con.getString("[@channel]"));
 					}
 					if(source==null)
-						source = env.addSource(bitCoinSource);
+						source = env.addSource(satoriSource);
 					else
-						source = source.union(env.addSource(bitCoinSource));
+						source = source.union(env.addSource(satoriSource));
 					break;
 				}
 				case "kafka":{

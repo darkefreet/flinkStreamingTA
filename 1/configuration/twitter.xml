@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <sources>
-        <!--<source ip="" port="" properties="twitter.properties">twitter</source>-->
-        <source ip="localhost" port="4542" properties="">socket</source>
+        <!--<source ip="" port="" properties="twitter.properties" channel="">twitter</source>-->
+        <source ip="localhost" port="4542" properties="" channel="">socket</source>
     </sources>
 
     <!--DATA FILTERING AND SINGLE DATA PROCESSING-->

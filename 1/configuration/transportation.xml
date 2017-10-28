@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <sources>
-        <source ip="" port="" properties="bitcoin.properties" channel="bitcoin-transactions">satori</source>
+        <source ip="" port="" topic="" properties="transportation.properties" channel="transportation">satori</source>
         <!--<source ip="localhost" port="4542" properties="" channel="">socket</source>-->
     </sources>
 
     <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
     <dataTransformation>
         <type>json</type>
-        <id>tx_index</id>
-        <filter>{x.size}>=100</filter>
-        <processingClass>DataProcess.StreamProcess.TransactionPartition</processingClass>
-        <numericAttributes status="true">
-            <attribute weight="0.0005">value</attribute>
+        <id>id</id>
+        <filter>true</filter>
+        <processingClass></processingClass>
+        <numericAttributes status="false">
+            <attribute weight=""></attribute>
         </numericAttributes>
-        <dataSink status="false">
+        <dataSink status="true">
             <type ip="" port="" path="" topic="">print</type>
         </dataSink>
         <dataIncluded>
@@ -22,25 +22,24 @@
         </dataIncluded>
     </dataTransformation>
 
-
     <!--WINDOW CONFIGURATION-->
-    <window status="true">
+    <window status="false">
         <!--KEY FOR STREAM DATA-->
         <keyBy value="1">static</keyBy>
-        <type>sliding</type><!--options: tumbling / sliding / session -->
+        <type>tumbling</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>
             <minutes>0</minutes>
-            <seconds>30</seconds>
+            <seconds>10</seconds>
         </size>
         <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
             <hours>0</hours>
             <minutes>0</minutes>
-            <seconds>15</seconds>
+            <seconds>30</seconds>
         </overlap>
-        <processingClass>DataProcess.WindowProcess.WindowDBSCANProcess</processingClass>
-        <dataSink status="true">
+        <processingClass/>
+        <dataSink status="false">
             <type ip="" port="" path="" topic="">print</type>
         </dataSink>
     </window>
