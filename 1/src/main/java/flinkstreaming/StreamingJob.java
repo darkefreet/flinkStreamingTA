@@ -18,10 +18,11 @@ package flinkstreaming;
  * limitations under the License.
  */
 
+import DataProcess.StreamParser;
 import DataProcess.WindowStreamProcess;
+import DataSource.PubnubSource;
 import DataSource.SatoriSource;
 import Model.Instances.Instance;
-import DataProcess.StreamParser;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -70,6 +71,7 @@ public class StreamingJob {
 	private static DataStream<String> source;
 	private static TwitterSource twitterSource;
 	private static SatoriSource satoriSource;
+	private static PubnubSource pubnubSource;
 
 	private static void sinkFunction(DataStream<String> sinkSource, SubnodeConfiguration subconf){
 		switch(subconf.getString("type")){
@@ -159,8 +161,20 @@ public class StreamingJob {
 						source = source.union(stream);
 					break;
 				}
+				case "pubnub":{
+					if(pubnubSource ==null) {
+						Properties prop = new Properties();
+						FileInputStream input = new FileInputStream(con.getString("[@properties]"));
+						prop.load(input);
+						pubnubSource = new PubnubSource(prop,con.getString("[@channel]"));
+					}
+					if(source==null)
+						source = env.addSource(pubnubSource);
+					else
+						source = source.union(env.addSource(pubnubSource));
+					break;
+				}
 				default:{
-					//do nothing
 				}
 			}
 		}

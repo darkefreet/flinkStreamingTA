@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <sources>
+        <source ip="" port="" topic="" properties="satori_transportation.properties" channel="transportation">satori</source>
+        <!--<source ip="localhost" port="4542" properties="" channel="">socket</source>-->
+    </sources>
+
+    <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
+    <dataTransformation>
+        <type>json</type>
+        <id>id</id>
+        <filter>true</filter>
+        <processingClass></processingClass>
+        <numericAttributes status="false">
+            <attribute weight=""></attribute>
+        </numericAttributes>
+        <dataSink status="true">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+        <dataIncluded>
+            <path>*</path>
+        </dataIncluded>
+    </dataTransformation>
+
+    <!--WINDOW CONFIGURATION-->
+    <window status="false">
+        <!--KEY FOR STREAM DATA-->
+        <keyBy value="1">static</keyBy>
+        <type>tumbling</type><!--options: tumbling / sliding / session -->
+        <time>process</time><!--options: event / process-->
+        <size>
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>10</seconds>
+        </size>
+        <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
+            <hours>0</hours>
+            <minutes>0</minutes>
+            <seconds>30</seconds>
+        </overlap>
+        <processingClass/>
+        <dataSink status="false">
+            <type ip="" port="" path="" topic="">print</type>
+        </dataSink>
+    </window>
+
+</configuration>

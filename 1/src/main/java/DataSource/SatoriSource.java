@@ -70,7 +70,7 @@ public class SatoriSource extends RichSourceFunction<String> implements Stoppabl
             if(!queue.isEmpty()){
                 scx.collect(queue.remove());
             }
-            Thread.sleep(5L);
+            Thread.sleep(2L);
         }
     }
 
