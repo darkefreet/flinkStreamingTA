@@ -30,6 +30,7 @@ import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.*;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
@@ -40,6 +41,7 @@ import org.apache.flink.util.Collector;
 import org.apache.hadoop.util.Time;
 
 import java.io.FileInputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
@@ -138,43 +140,29 @@ public class StreamingJob {
 						source = source.union(env.addSource(twitterSource));
 					break;
 				}
-				case "satori":{
-					if(satoriSource ==null) {
-						Properties prop = new Properties();
-						FileInputStream input = new FileInputStream(con.getString("[@properties]"));
-						prop.load(input);
-						satoriSource = new SatoriSource(prop,con.getString("[@channel]"));
-					}
-					if(source==null)
-						source = env.addSource(satoriSource);
-					else
-						source = source.union(env.addSource(satoriSource));
-					break;
-				}
-				case "kafka":{
+				case "kafka": {
 					Properties properties = new Properties();
-					properties.setProperty("bootstrap.servers", con.getString("[@ip]")+":"+con.getString("[@port]"));
+					properties.setProperty("bootstrap.servers", con.getString("[@ip]") + ":" + con.getString("[@port]"));
 					DataStream<String> stream = env.addSource(new FlinkKafkaConsumer09<String>(con.getString("[@topic]"), new SimpleStringSchema(), properties));
-					if(source==null)
+					if (source == null)
 						source = stream;
 					else
 						source = source.union(stream);
 					break;
 				}
-				case "pubnub":{
-					if(pubnubSource ==null) {
-						Properties prop = new Properties();
-						FileInputStream input = new FileInputStream(con.getString("[@properties]"));
-						prop.load(input);
-						pubnubSource = new PubnubSource(prop,con.getString("[@channel]"));
-					}
-					if(source==null)
-						source = env.addSource(pubnubSource);
-					else
-						source = source.union(env.addSource(pubnubSource));
-					break;
-				}
 				default:{
+					Properties prop = new Properties();
+					FileInputStream input = new FileInputStream(con.getString("[@properties]"));
+					prop.load(input);
+					Class cl = Class.forName(con.getString(""));
+					Constructor construct = cl.getConstructor(Properties.class,String.class);
+					Object obj = construct.newInstance(prop,con.getString("[@channel]"));
+					if(source==null)
+						source = env.addSource((SourceFunction<String>) obj);
+					else
+						source = source.union(env.addSource((SourceFunction<String>) obj));
+					break;
+
 				}
 			}
 		}

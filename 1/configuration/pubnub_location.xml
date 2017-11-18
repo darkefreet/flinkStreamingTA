@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <sources>
-        <source ip="" port="" topic="" properties="pubnub_location.properties" channel="rts-xNjiKP4Bg4jgElhhn9v9-geo-map">pubnub</source>
+        <source ip="" port="" topic="" properties="pubnub_location.properties" channel="rts-xNjiKP4Bg4jgElhhn9v9-geo-map">DataSource.PubnubSource</source>
         <!--<source ip="localhost" port="4542" properties="" channel="">socket</source>-->
     </sources>
 
