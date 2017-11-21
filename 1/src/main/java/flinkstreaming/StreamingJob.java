@@ -20,8 +20,6 @@ package flinkstreaming;
 
 import DataProcess.StreamParser;
 import DataProcess.WindowStreamProcess;
-import DataSource.PubnubSource;
-import DataSource.SatoriSource;
 import Model.Instances.Instance;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -72,8 +70,6 @@ public class StreamingJob {
 	private static XMLConfiguration config;
 	private static DataStream<String> source;
 	private static TwitterSource twitterSource;
-	private static SatoriSource satoriSource;
-	private static PubnubSource pubnubSource;
 
 	private static void sinkFunction(DataStream<String> sinkSource, SubnodeConfiguration subconf){
 		switch(subconf.getString("type")){

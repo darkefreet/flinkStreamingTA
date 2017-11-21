@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <sources>
-        <source ip="" port="" properties="bitcoin.properties" channel="bitcoin-transactions">satori</source>
+        <source ip="" port="" properties="bitcoin.properties" channel="bitcoin-transactions">DataSource.SatoriSource</source>
         <!--<source ip="localhost" port="4542" properties="" channel="">socket</source>-->
     </sources>
 

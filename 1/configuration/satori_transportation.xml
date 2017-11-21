@@ -9,7 +9,7 @@
     <dataTransformation>
         <type>json</type>
         <id>id</id>
-        <filter>true</filter>
+        <filter>{header.user-data} == "octa"</filter>
         <processingClass></processingClass>
         <numericAttributes status="false">
             <attribute weight=""></attribute>
@@ -18,7 +18,7 @@
             <type ip="" port="" path="" topic="">print</type>
         </dataSink>
         <dataIncluded>
-            <path>*</path>
+            <path>header.user-data</path>
         </dataIncluded>
     </dataTransformation>
 

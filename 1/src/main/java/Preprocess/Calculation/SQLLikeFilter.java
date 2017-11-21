@@ -53,7 +53,7 @@ public class SQLLikeFilter {
 
     }
 
-    public String parseExpression(String exp){
+    public String explodeOperation(String exp){
         exp = exp.replaceAll("\\+"," + ");
         exp = exp.replaceAll("-"," - ");
         exp = exp.replaceAll("\\*"," * ");
@@ -66,6 +66,22 @@ public class SQLLikeFilter {
         exp = exp.replaceAll("!"," ! ");
         exp = exp.replaceAll("\\|"," | ");
         exp = exp.replaceAll("\\s+"," ");
+        return exp;
+    }
+
+    public String parseExpression(String exp){
+        exp.replaceAll("\\{", " {");
+        exp.replaceAll("}", "} ");
+        String full[] = exp.split("\\s+");
+        String app = "";
+        for(String a:full){
+            if(a.charAt(0)=='"' || a.charAt(0)=='{'){
+                app+=a;
+            }else{
+                app+=explodeOperation(a);
+            }
+        }
+        exp = app;
         int count = 0;
         String ret = "";
         for(int i = 0; i < exp.length();i++){
@@ -181,7 +197,7 @@ public class SQLLikeFilter {
                     temp = temp.replaceAll("\\{","").replaceAll("}","");
                     JsonNode a = jsonPath.solve(temp,node);
                     if(a==null) return false;
-                    temp = a.getValueAsText();
+                    temp = a.toString();
                 }
                 operand.push(notOperator(temp));
             }//case binary operator
@@ -192,7 +208,7 @@ public class SQLLikeFilter {
                     op2 = op2.replaceAll("\\{","").replaceAll("}","");
                     JsonNode a = jsonPath.solve(op2,node);
                     if(a==null) return false;
-                    op2 = a.getValueAsText();
+                    op2 = a.toString();
                 }
                 if(operand.empty()) return false;
                 String op1 = operand.pop();
@@ -200,7 +216,8 @@ public class SQLLikeFilter {
                     op1 = op1.replaceAll("\\{","").replaceAll("}","");
                     JsonNode a = jsonPath.solve(op1,node);
                     if(a==null) return false;
-                    op1 = a.getValueAsText();
+                    op1 = a.toString();
+
                 }
 //                System.out.println("op1 " + op1);
 //                System.out.println("op2 " + op2);
@@ -216,7 +233,8 @@ public class SQLLikeFilter {
             result = result.replaceAll("\\{","").replaceAll("}","");
             JsonNode a = jsonPath.solve(result,node);
             if(a==null) return false;
-            result = a.getValueAsText();
+            result = a.toString();
+            System.out.println(a);
         }
         return stringToBoolean(result);
     }

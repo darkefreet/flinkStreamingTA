@@ -55,7 +55,7 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                                 if(res!=null){
                                     for(Instance i:res){
                                         if(jsonPathTraverse.solve(path,i.getJson())!=null)
-                                            i.setId(jsonPathTraverse.solve(path,i.getJson()).getValueAsText());
+                                            i.setId(jsonPathTraverse.solve(path,i.getJson()).toString());
                                         if(config.configurationAt("dataTransformation.numericAttributes").getBoolean("[@status]")){
                                             List<HierarchicalConfiguration> hconfigs = config.configurationsAt("dataTransformation.numericAttributes.attribute");
                                             for(HierarchicalConfiguration hcon : hconfigs){
@@ -77,7 +77,7 @@ public class StreamParser implements FlatMapFunction<String, Instance> {
                                 }
                             }else{
                                 if(jsonPathTraverse.solve(path,jsonNode)!=null)
-                                    inst.setId(jsonPathTraverse.solve(path,jsonNode).getValueAsText());
+                                    inst.setId(jsonPathTraverse.solve(path,jsonNode).toString());
                                 if(config.configurationAt("dataTransformation.numericAttributes").getBoolean("[@status]")){
                                     List<HierarchicalConfiguration> hconfigs = config.configurationsAt("dataTransformation.numericAttributes.attribute");
                                     for(HierarchicalConfiguration con : hconfigs){
