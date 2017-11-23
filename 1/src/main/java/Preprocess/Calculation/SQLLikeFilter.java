@@ -70,15 +70,19 @@ public class SQLLikeFilter {
     }
 
     public String parseExpression(String exp){
-        exp.replaceAll("\\{", " {");
-        exp.replaceAll("}", "} ");
+        exp = exp.replaceAll("\\{", " {");
+        exp = exp.replaceAll("}", "} ");
         String full[] = exp.split("\\s+");
         String app = "";
         for(String a:full){
-            if(a.charAt(0)=='"' || a.charAt(0)=='{'){
-                app+=a;
-            }else{
-                app+=explodeOperation(a);
+            if(a!=null) {
+                if (a.length() > 1) {
+                    if (a.charAt(0) == '"' || a.charAt(0) == '{') {
+                        app += a;
+                    } else {
+                        app += explodeOperation(a);
+                    }
+                }
             }
         }
         exp = app;
