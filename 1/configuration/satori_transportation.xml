@@ -8,38 +8,39 @@
     <!--DATA FILTERING AND SINGLE DATA PROCESSING-->
     <dataTransformation>
         <type>json</type>
-        <id>id</id>
+        <id>entity[0].vehicle.vehicle.id</id>
         <filter>{header.user-data} == "octa"</filter>
         <processingClass></processingClass>
         <numericAttributes status="false">
             <attribute weight=""></attribute>
         </numericAttributes>
-        <dataSink status="true">
+        <dataSink status="false">
             <type ip="" port="" path="" topic="">print</type>
         </dataSink>
         <dataIncluded>
-            <path>header.user-data</path>
+            <path>entity[0].vehicle.position.longitude</path>
+            <path>entity[0].vehicle.position.latitude</path>
         </dataIncluded>
     </dataTransformation>
 
     <!--WINDOW CONFIGURATION-->
-    <window status="false">
+    <window status="true">
         <!--KEY FOR STREAM DATA-->
         <keyBy value="1">static</keyBy>
-        <type>tumbling</type><!--options: tumbling / sliding / session -->
+        <type>sliding</type><!--options: tumbling / sliding / session -->
         <time>process</time><!--options: event / process-->
         <size>
             <hours>0</hours>
-            <minutes>0</minutes>
-            <seconds>10</seconds>
+            <minutes>2</minutes>
+            <seconds>0</seconds>
         </size>
         <overlap><!--CAN BE IGNORED IF WINDOW TYPE IS TUMBLING OR SESSION-->
             <hours>0</hours>
             <minutes>0</minutes>
             <seconds>30</seconds>
         </overlap>
-        <processingClass/>
-        <dataSink status="false">
+        <processingClass>DataProcess.WindowProcess.TrajectoryClustering</processingClass>
+        <dataSink status="true">
             <type ip="" port="" path="" topic="">print</type>
         </dataSink>
     </window>

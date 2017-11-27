@@ -48,6 +48,13 @@ public class Instance implements Serializable{
         else {
             JSONPathTraverse JsonPath = new JSONPathTraverse();
             JsonNode dummy = JsonPath.solve(path, getJson());
+            if(path.contains(".")) {
+                path = path.substring(path.lastIndexOf(".")+1);
+            }
+            if(path.contains("[")) {
+                path = path.substring(path.indexOf("["));
+                path = path.replaceAll("\\[", "").replaceAll("]", "");
+            }
             ((ObjectNode)data).put(path, dummy);
         }
     }

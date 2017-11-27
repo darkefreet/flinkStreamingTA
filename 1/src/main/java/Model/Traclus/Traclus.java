@@ -1,8 +1,9 @@
 package Model.Traclus;
 
+
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Queue;
+import java.awt.geom.Point2D;
+import java.util.*;
 
 
 /**
@@ -18,22 +19,22 @@ public class Traclus {
     }
 
     //BASIC FUNCTIONS
-    public double d_euc(Point u, Point v){
+    public double d_euc(Point2D u, Point2D v){
         double squaredTotal = 0.0;
         squaredTotal+=Math.pow((u.getX()+v.getX()),2);
         squaredTotal+=Math.pow((u.getY()+v.getY()),2);
         return Math.sqrt(squaredTotal);
     }
 
-    public double d2(Point u, Point v){
+    public double d2(Point2D u, Point2D v){
         double squaredTotal = 0.0;
         squaredTotal+=Math.pow((u.getX()+v.getX()),2);
         squaredTotal+=Math.pow((u.getY()+v.getY()),2);
         return squaredTotal;
     }
 
-    public Point projection_point(Point u, Point v, Point p){
-        Point proj = new Point();
+    public Point2D projection_point(Point2D u, Point2D v, Point2D p){
+        Point2D proj = new Point2D.Double();
 
         double l = d2(u,v);
 
@@ -52,10 +53,10 @@ public class Traclus {
     }
 
     //DISTANCE FUNCTIONS
-    public double perpen_dist(Point si,Point ei,Point sj,Point ej)
+    public double perpen_dist(Point2D si,Point2D ei,Point2D sj,Point2D ej)
     {
-        Point ps = projection_point(si,ei,sj);
-        Point pe = projection_point(si,ei,ej);
+        Point2D ps = projection_point(si,ei,sj);
+        Point2D pe = projection_point(si,ei,ej);
 
         double dl1 = d_euc(sj,ps);
         double dl2 = d_euc(ej,pe);
@@ -66,7 +67,7 @@ public class Traclus {
         return (dl1*dl1 + dl2*dl2)/(dl1 + dl2);
     }
 
-    public double angle_dist(Point si,Point ei,Point sj,Point ej)
+    public double angle_dist(Point2D si,Point2D ei,Point2D sj,Point2D ej)
     {
         double alpha1 = Math.atan2(ei.getY() - si.getY(),ei.getX() - si.getX());
         double alpha2 = Math.atan2(ej.getY() - sj.getY(),ej.getX() - sj.getX());
@@ -76,10 +77,10 @@ public class Traclus {
         return l * (Math.sin(alpha2-alpha1));
     }
 
-    double par_dist(Point si,Point ei,Point sj,Point ej)
+    double par_dist(Point2D si,Point2D ei,Point2D sj,Point2D ej)
     {
-        Point ps = projection_point(si,ei,sj);
-        Point pe = projection_point(si,ei,ej);
+        Point2D ps = projection_point(si,ei,sj);
+        Point2D pe = projection_point(si,ei,ej);
 
         double l1 = Math.min(d_euc(ps,si),d_euc(ps,ei));
         double l2 = Math.min(d_euc(pe,si),d_euc(pe,ei));
@@ -87,7 +88,7 @@ public class Traclus {
         return Math.min(l1,l2);
     }
 
-    double total_dist(Point si,Point ei,Point sj,Point ej, double w_perpendicular, double w_parallel, double w_angle)
+    double total_dist(Point2D si,Point2D ei,Point2D sj,Point2D ej, double w_perpendicular, double w_parallel, double w_angle)
     {
         if(w_angle==0)w_angle=0.33;
         if(w_perpendicular==0)w_perpendicular=0.33;
@@ -99,7 +100,7 @@ public class Traclus {
     }
 
 
-    public double MDL_PAR(ArrayList<Point> st, Point en)
+    public double MDL_PAR(ArrayList<Point2D> st, Point2D en)
     {
         double d1 = d_euc(st.get(0), en);
         double PER_DIST=0, ANG_DIST=0;
@@ -107,8 +108,8 @@ public class Traclus {
             st.add(en);
         if(st.size()>1){
             int i = 1;
-            Point it = st.get(0);
-            Point it2;
+            Point2D it = st.get(0);
+            Point2D it2;
             it2 = st.get(i);
             while (true)
             {
@@ -136,15 +137,15 @@ public class Traclus {
         return LH + LDH;
     }
 
-    ArrayList<Point> traclus_partition (ArrayList<Point> A)
+    public ArrayList<Point2D> traclus_partition (ArrayList<Point2D> A)
     {
-        ArrayList<Point> CP = new ArrayList<>();
+        ArrayList<Point2D> CP = new ArrayList<>();
         CP.add(A.get(0));
         if(A.size()>1){
-            Point it = A.get(0),it2 = A.get(0),it2_old = A.get(0);
+            Point2D it = A.get(0),it2_old = A.get(0);
             int i = 1;
-            it2 = A.get(i);
-            ArrayList<Point> temp = new ArrayList<>(CP);
+            Point2D it2 = A.get(i);
+            ArrayList<Point2D> temp = new ArrayList<>(CP);
             while (it2 != A.get(A.size()-1))
             {
                 double cost = MDL_PAR(temp, it2);
@@ -168,17 +169,83 @@ public class Traclus {
         return CP;
     }
 
-    ArrayList<Point> compute_NeIndizes(ArrayList<Point> L,int idx, double eps)
+    public ArrayList<LineSegment> compute_NeIndizes(ArrayList<LineSegment> L,LineSegment idx, double eps)
     {
-        ArrayList<Point> ret = new ArrayList<>();
-        for (int i=0; i < L.size(); i++)
-            if (idx != i)
-                if (d_euc(L.get(i),L.get(idx)) <= eps)
-                {
-                    ret.add(L.get(i));
+        ArrayList<LineSegment> ret = new ArrayList<>();
+        for (LineSegment i:L)
+            if (idx != i) {
+                if (total_dist(i.s, i.e, idx.s, idx.e, 0.33, 0.33, 0.33) <= eps) {
+                    ret.add(i);
                 }
+            }
         return ret;
     }
+
+    public void expandCluster(ArrayList<LineSegment> L, Queue<LineSegment> Q, double eps, int minLines, int clusterID)
+    {
+        if(Q!=null){
+            while (!Q.isEmpty())
+            {
+                LineSegment m = Q.remove();
+                ArrayList<LineSegment> Ne = new ArrayList<>();
+                Ne = compute_NeIndizes(L,m,eps);
+                Ne.add(m);
+                if (Ne.size() >= minLines)
+                {
+                    for (LineSegment it:Ne)
+                    {
+
+                        if (it.cluster == UNCLASSIFIED)
+                        Q.add(it);
+                        if (it.cluster < 0)
+                        it.cluster = clusterID;
+                    }
+                }
+            }
+        }
+    }
+
+    public ArrayList<LineSegment> grouping(ArrayList <LineSegment> L, double eps, int minLines)
+    {
+        int clusterID=0;
+        Queue<LineSegment> Q = new LinkedList<LineSegment>();;
+        for (LineSegment i:L)
+        {
+            if (i.cluster == UNCLASSIFIED)
+            {
+                ArrayList<LineSegment> Ne = compute_NeIndizes(L,i,eps);
+                if (Ne.size()+1 >= minLines)
+                {
+                    i.cluster = clusterID;
+                    for (LineSegment it : Ne)
+                    {
+                        it.cluster = clusterID;
+                        Q.add(it);
+                    }
+                    expandCluster(L,Q, eps,minLines,clusterID);
+                    clusterID++;
+                }else  // not minLines
+                {
+                    i.cluster = NOISE;
+                }
+            }
+        }
+        for (int i=0; i < clusterID; i++)
+        {
+            Set<String> sources = new HashSet<>();
+            for (LineSegment j : L)
+                if (j.cluster == i)
+                    sources.add(j.trajectory_index);
+            if (sources.size() < minLines)
+            {
+                for (LineSegment j : L)
+                    if (j.cluster == i)
+                        j.cluster = REMOVED;
+            }
+        }
+        return L;
+    }
+
 
 
 }
